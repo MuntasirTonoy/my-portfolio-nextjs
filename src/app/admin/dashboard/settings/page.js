@@ -10,7 +10,7 @@ const SettingsEditor = () => {
     currentPassword: "",
     newPassword: "",
     confirmPassword: "",
-    newEmail: "admin@example.com",
+    newEmail: "",
   });
   const [loading, setLoading] = useState(false);
 
@@ -70,7 +70,7 @@ const SettingsEditor = () => {
           <Input 
             value={data.newEmail} 
             onChange={(e) => set("newEmail", e.target.value)} 
-            placeholder="admin@example.com"
+            placeholder="you@example.com"
           />
         </Field>
       </Card>

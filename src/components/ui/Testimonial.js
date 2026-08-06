@@ -18,9 +18,10 @@ const Testimonials = () => {
     const getReviews = async () => {
       try {
         const data = await fetchReviews();
-        setReviews(data);
+        setReviews(data && data.length ? data : []);
       } catch (error) {
         console.error("Error fetching reviews:", error);
+        setReviews([]);
       } finally {
         setTimeout(() => setLoading(false), 500); // Small delay for smooth transition
       }

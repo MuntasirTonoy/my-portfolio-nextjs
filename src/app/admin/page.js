@@ -8,7 +8,7 @@ import { loginAdmin, forgotPassword } from "@/lib/api";
 import { toast } from "react-hot-toast";
 
 const AdminLogin = () => {
-  const [email, setEmail] = useState("admin@example.com");
+  const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState("");
@@ -135,7 +135,7 @@ const AdminLogin = () => {
                     setEmail(e.target.value);
                     setError("");
                   }}
-                  placeholder="admin@example.com"
+                  placeholder="you@example.com"
                   className="w-full pl-10 pr-4 py-3 bg-base-200 border border-base-300 rounded-md text-sm focus:outline-none focus:border-[#02b677] focus:ring-1 focus:ring-[#02b677] transition-all"
                   required
                 />
