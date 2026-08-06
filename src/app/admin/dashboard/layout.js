@@ -69,7 +69,7 @@ export default function AdminDashboardLayout({ children }) {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="fixed inset-0 bg-black/50 z-20 lg:hidden"
+            className="fixed inset-0 bg-black/50 z-30 lg:hidden"
             onClick={() => setSidebarOpen(false)}
           />
         )}
@@ -78,7 +78,7 @@ export default function AdminDashboardLayout({ children }) {
       {/* Sidebar */}
       <aside
         className={`
-        fixed top-0 left-0 h-full w-64 bg-base-100 border-r border-base-300 z-30 flex flex-col
+        fixed top-0 left-0 h-full w-64 bg-base-100 border-r border-base-300 z-40 flex flex-col
         transition-transform duration-300
         ${sidebarOpen ? "translate-x-0" : "-translate-x-full"} lg:translate-x-0
       `}
@@ -154,7 +154,7 @@ export default function AdminDashboardLayout({ children }) {
       {/* Main content */}
       <div className="flex-1 lg:ml-64 flex flex-col min-h-screen">
         {/* Top bar */}
-        <header className="sticky top-0 z-10 bg-base-100 border-b border-base-300 px-6 py-4 flex items-center gap-4">
+        <header className="sticky top-0 z-20 bg-base-100 border-b border-base-300 px-6 py-4 flex items-center gap-4">
           <button
             className="lg:hidden p-2 rounded-lg hover:bg-base-200 cursor-pointer"
             onClick={() => setSidebarOpen(true)}

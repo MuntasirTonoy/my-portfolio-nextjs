@@ -8,10 +8,10 @@ import Link from "next/link";
 import { usePortfolio } from "@/components/providers/AdminProvider";
 
 // Import local images as fallbacks
-import image1 from "@/assets/images/img1.jpg";
-import image2 from "@/assets/images/img2.jpg";
-import image3 from "@/assets/images/img3.jpg";
-import image4 from "@/assets/images/img4.jpg";
+import image1 from "@/assets/images/muntasir-mahmud-web-developer.jpg";
+import image2 from "@/assets/images/muntasir-mahmud-full-stack.jpg";
+import image3 from "@/assets/images/muntasir-mahmud-coding.jpg";
+import image4 from "@/assets/images/muntasir-mahmud-workspace.jpg";
 
 const Introduction = () => {
   const { portfolioData, loading } = usePortfolio();
