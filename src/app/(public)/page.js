@@ -7,6 +7,7 @@ import Skills from "@/components/sections/Skills";
 import Service from "@/components/sections/Service";
 import FeaturedProjects from "@/components/sections/FeaturedProjects";
 import Testimonials from "@/components/ui/Testimonial";
+import HeroCodeSection from "@/components/ui/HeroCodeSection";
 
 export default function Home() {
   return (
@@ -15,8 +16,10 @@ export default function Home() {
       <Introduction />
       <Skills />
       <Service />
+      <HeroCodeSection/>
       <FeaturedProjects />
       <Testimonials />
+   
     </div>
   );
 }

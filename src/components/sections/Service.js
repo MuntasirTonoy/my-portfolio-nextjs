@@ -2,7 +2,7 @@
 
 import React from "react";
 import { motion } from "framer-motion";
-import { FaCode, FaServer, FaDatabase, FaMobileAlt } from "react-icons/fa";
+import { FaCode, FaServer, FaDatabase, FaLaptopCode  } from "react-icons/fa";
 import ServiceCard from "@/components/ui/ServiceCard";
 import { usePortfolio } from "@/components/providers/AdminProvider";
 
@@ -10,7 +10,7 @@ const defaultIcons = [
   <FaCode size={40} className="text-spotify" key="code" />,
   <FaServer size={40} className="text-spotify" key="server" />,
   <FaDatabase size={40} className="text-spotify" key="db" />,
-  <FaMobileAlt size={40} className="text-spotify" key="mobile" />,
+  <FaLaptopCode size={40} className="text-spotify" key="laptop" />,
 ];
 
 const Services = () => {
