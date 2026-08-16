@@ -6,6 +6,7 @@ import { SectionWrapper, Card } from "@/components/admin/AdminComponents";
 import Swal from "sweetalert2";
 import { FiEye, FiEyeOff, FiTrash2, FiUser } from "react-icons/fi";
 import { motion, AnimatePresence } from "framer-motion";
+import { CardSkeleton } from "@/components/ui/Skeleton";
 
 const ReviewsManager = () => {
   const [reviews, setReviews] = useState([]);
@@ -69,8 +70,10 @@ const ReviewsManager = () => {
   };
 
   if (loading) return (
-    <div className="flex justify-center py-20">
-      <span className="loading loading-spinner loading-lg text-spotify"></span>
+    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+      <CardSkeleton />
+      <CardSkeleton />
+      <CardSkeleton />
     </div>
   );
 

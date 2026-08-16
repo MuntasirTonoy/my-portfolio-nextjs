@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from "react";
 import { useAdmin } from "@/components/providers/AdminProvider";
 import { SectionWrapper, Card, Field, Input, Textarea, SectionTitle } from "@/components/admin/AdminComponents";
+import { AdminFormSkeleton } from "@/components/ui/Skeleton";
 
 const ContactEditor = () => {
   const { portfolioData, updateSection, resetSection, loading } = useAdmin();
@@ -14,11 +15,7 @@ const ContactEditor = () => {
     }
   }, [portfolioData?.contact]);
 
-  if (loading || !data) return (
-    <div className="flex justify-center py-20">
-      <span className="loading loading-spinner loading-lg text-spotify"></span>
-    </div>
-  );
+  if (loading || !data) return <AdminFormSkeleton />;
 
   const set = (key, val) => setData((d) => ({ ...d, [key]: val }));
   const setSocial = (key, val) => {

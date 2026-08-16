@@ -5,6 +5,7 @@ import Link from "next/link";
 import { motion } from "framer-motion";
 import { FiUser, FiCode, FiBriefcase, FiFolder, FiMessageSquare, FiArrowRight, FiGlobe, FiLayers, FiStar } from "react-icons/fi";
 import { useAdmin } from "@/components/providers/AdminProvider";
+import Skeleton from "@/components/ui/Skeleton";
 
 const sections = [
   { to: "/admin/dashboard/hero", label: "Hero Section", icon: <FiUser />, desc: "Name, greeting, CTA buttons, bio text", color: "#02b677" },
@@ -27,9 +28,8 @@ const AdminDashboardHome = () => {
 
   if (loading || !portfolioData?.hero) {
     return (
-      <div className="flex flex-col items-center justify-center min-h-[60vh] space-y-4">
-        <span className="loading loading-spinner loading-lg text-spotify"></span>
-        <p className="text-base-content/50 font-medium">Loading your portfolio data...</p>
+      <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4">
+        {[1,2,3,4,5,6].map(i => <Skeleton key={i} className="h-40 w-full" rounded="rounded-2xl" />)}
       </div>
     );
   }

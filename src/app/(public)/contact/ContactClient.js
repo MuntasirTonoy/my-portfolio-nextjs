@@ -16,7 +16,7 @@ import {
 import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
 import { usePortfolio } from "@/components/providers/AdminProvider";
-import Loading from "@/components/ui/Loading";
+import { ContactSkeleton } from "@/components/ui/Skeleton";
 import { createReview, uploadImage } from "@/lib/api";
 
 const ContactClient = () => {
@@ -59,7 +59,7 @@ const ContactClient = () => {
     setReviewValue("avatar", "");
   };
 
-  if (globalLoading || !portfolioData?.contact) return <Loading fullScreen />;
+  if (globalLoading || !portfolioData?.contact) return <ContactSkeleton />;
 
   const { contact } = portfolioData;
 
@@ -203,7 +203,7 @@ const ContactClient = () => {
             ))}
           </ul>
 
-          <div className="mt-12 pt-10 border-t border-base-content/5">
+          <div className="mt-12 md:pt-10 border-t border-base-content/5">
             <p className="text-xs font-bold text-base-content/30 uppercase tracking-[0.2em] mb-4">
               Client Feedback
             </p>

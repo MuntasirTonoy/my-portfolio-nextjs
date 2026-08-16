@@ -4,7 +4,7 @@ import React from "react";
 import { FaExternalLinkAlt, FaGithub } from "react-icons/fa";
 import Link from "next/link";
 import { useParams } from "next/navigation";
-import Loading from "@/components/ui/Loading";
+import { ProjectDetailsSkeleton } from "@/components/ui/Skeleton";
 import Button from "@/components/ui/Button";
 import { usePortfolio } from "@/components/providers/AdminProvider";
 import { GoDotFill } from "react-icons/go";
@@ -18,7 +18,7 @@ const ProjectDetails = () => {
   const projects = portfolioData?.projects || [];
   const project = projects.find((p) => p._id === id || p.id?.toString() === id);
 
-  if (loading) return <Loading fullScreen />;
+  if (loading) return <ProjectDetailsSkeleton />;
   if (!project)
     return (
       <div className="min-h-screen flex flex-col items-center justify-center space-y-4">

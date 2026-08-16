@@ -13,13 +13,13 @@ import {
 import { IoCheckmarkDoneCircle } from "react-icons/io5";
 import Link from "next/link";
 import { usePortfolio } from "@/components/providers/AdminProvider";
-import Loading from "@/components/ui/Loading";
+import { AboutSkeleton } from "@/components/ui/Skeleton";
 
 const AboutClient = () => {
   const { portfolioData, loading } = usePortfolio();
   const [selectedCert, setSelectedCert] = useState(null);
 
-  if (loading || !portfolioData?.about) return <Loading fullScreen />;
+  if (loading || !portfolioData?.about) return <AboutSkeleton />;
 
   const {
     name,

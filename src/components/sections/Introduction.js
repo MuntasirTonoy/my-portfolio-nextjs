@@ -6,6 +6,7 @@ import Button from "@/components/ui/Button";
 import { BsArrowRight } from "react-icons/bs";
 import Link from "next/link";
 import { usePortfolio } from "@/components/providers/AdminProvider";
+import { SectionSkeleton } from "@/components/ui/Skeleton";
 
 // Import local images as fallbacks
 import image1 from "@/assets/images/img1.jpg";
@@ -35,7 +36,8 @@ const Introduction = () => {
     return () => clearInterval(interval);
   }, [imageArray.length]);
 
-  if (loading || !portfolioData?.introduction) return null;
+  if (loading) return <SectionSkeleton />;
+  if (!portfolioData?.introduction) return null;
 
   const { introduction } = portfolioData;
 

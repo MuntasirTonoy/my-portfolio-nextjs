@@ -35,66 +35,66 @@ const abstractCodeLines = [
     id: 1,
     indent: 0,
     segments: [
-      { color: "bg-purple-500", width: "w-20" },
-      { color: "bg-cyan-400", width: "w-32" },
-      { color: "bg-amber-400", width: "w-14" },
+      { color: "bg-purple-500", width: "w-10 sm:w-20" },
+      { color: "bg-cyan-400", width: "w-16 sm:w-32" },
+      { color: "bg-amber-400", width: "w-7 sm:w-14" },
     ],
   },
   {
     id: 2,
     indent: 0,
     segments: [
-      { color: "bg-spotify", width: "w-24" },
-      { color: "bg-pink-500", width: "w-40" },
+      { color: "bg-spotify", width: "w-12 sm:w-24" },
+      { color: "bg-pink-500", width: "w-20 sm:w-40" },
     ],
   },
   {
     id: 3,
     indent: 1,
     segments: [
-      { color: "bg-cyan-400", width: "w-16" },
-      { color: "bg-purple-500", width: "w-44" },
-      { color: "bg-amber-400", width: "w-12" },
+      { color: "bg-cyan-400", width: "w-8 sm:w-16" },
+      { color: "bg-purple-500", width: "w-22 sm:w-44" },
+      { color: "bg-amber-400", width: "w-6 sm:w-12" },
     ],
   },
   {
     id: 4,
     indent: 2,
     segments: [
-      { color: "bg-pink-500", width: "w-28" },
-      { color: "bg-blue-500", width: "w-36" },
+      { color: "bg-pink-500", width: "w-14 sm:w-28" },
+      { color: "bg-blue-500", width: "w-18 sm:w-36" },
     ],
   },
   {
     id: 5,
     indent: 2,
     segments: [
-      { color: "bg-emerald-400", width: "w-48" },
-      { color: "bg-amber-400", width: "w-20" },
+      { color: "bg-emerald-400", width: "w-24 sm:w-48" },
+      { color: "bg-amber-400", width: "w-10 sm:w-20" },
     ],
   },
   {
     id: 6,
     indent: 1,
     segments: [
-      { color: "bg-cyan-400", width: "w-32" },
-      { color: "bg-purple-500", width: "w-24" },
+      { color: "bg-cyan-400", width: "w-16 sm:w-32" },
+      { color: "bg-purple-500", width: "w-12 sm:w-24" },
     ],
   },
   {
     id: 7,
     indent: 1,
     segments: [
-      { color: "bg-rose-400", width: "w-16" },
-      { color: "bg-spotify", width: "w-52" },
+      { color: "bg-rose-400", width: "w-8 sm:w-16" },
+      { color: "bg-spotify", width: "w-26 sm:w-52" },
     ],
   },
   {
     id: 8,
     indent: 0,
     segments: [
-      { color: "bg-indigo-500", width: "w-24" },
-      { color: "bg-amber-400", width: "w-16" },
+      { color: "bg-indigo-500", width: "w-12 sm:w-24" },
+      { color: "bg-amber-400", width: "w-8 sm:w-16" },
     ],
   },
 ];
@@ -165,8 +165,8 @@ const segmentBarVariants = {
 
 export default function HeroCodeSection() {
   return (
-    <div className="hero min-h-screen bg-base-200 text-base-content px-4 py-12">
-      <div className="hero-content flex-col lg:flex-row-reverse gap-8 max-w-6xl w-full">
+    <div className="hero min-h-screen bg-base-200 text-base-content px-4 py-12 sm:py-16">
+      <div className="hero-content flex-col lg:flex-row-reverse gap-8 sm:gap-10 max-w-6xl w-full">
         {/* Right Side: Futuristic AI Automation Code Window */}
         <motion.div
           initial={{ opacity: 0, y: 30, scale: 0.95 }}
@@ -181,18 +181,18 @@ export default function HeroCodeSection() {
           {/* Window Frame - Adapts dynamically to light & dark themes */}
           <div className="relative rounded-2xl border border-base-300 bg-base-100 text-base-content  overflow-hidden">
             {/* Window Top Bar */}
-            <div className="flex items-center justify-between px-4 py-3 bg-base-300/80 border-b border-base-300 select-none">
-              <div className="flex items-center gap-2">
-                <span className="w-3 h-3 rounded-full bg-red-500/80 inline-block" />
-                <span className="w-3 h-3 rounded-full bg-amber-500/80 inline-block" />
-                <span className="w-3 h-3 rounded-full bg-emerald-500/80 inline-block" />
-                <span className="ml-3 text-xs font-mono text-base-content/70 flex items-center gap-1.5 font-medium">
+            <div className="flex items-center justify-between px-3 sm:px-4 py-2.5 sm:py-3 bg-base-300/80 border-b border-base-300 select-none">
+              <div className="flex items-center gap-2 min-w-0">
+                <span className="w-2.5 h-2.5 sm:w-3 sm:h-3 rounded-full bg-red-500/80 inline-block" />
+                <span className="w-2.5 h-2.5 sm:w-3 sm:h-3 rounded-full bg-amber-500/80 inline-block" />
+                <span className="w-2.5 h-2.5 sm:w-3 sm:h-3 rounded-full bg-emerald-500/80 inline-block" />
+                <span className="ml-2 sm:ml-3 text-[10px] sm:text-xs font-mono text-base-content/70 flex items-center gap-1.5 font-medium truncate">
                   <span>🤖</span> ai-pipeline.ts
                 </span>
               </div>
 
-              <div className="flex items-center gap-2">
-                <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-mono font-semibold bg-spotify/15 text-spotify border border-spotify/30">
+              <div className="flex items-center gap-2 shrink-0">
+                <span className="inline-flex items-center gap-1.5 px-2 sm:px-2.5 py-0.5 rounded-full text-[10px] sm:text-[11px] font-mono font-semibold bg-spotify/15 text-spotify border border-spotify/30">
                   <span className="w-1.5 h-1.5 rounded-full bg-spotify animate-ping" />
                   AI Active
                 </span>
@@ -205,30 +205,30 @@ export default function HeroCodeSection() {
               initial="hidden"
               whileInView="visible"
               viewport={{ once: false, amount: 0.15 }}
-              className="p-6 font-mono text-sm leading-relaxed min-h-87.5 flex flex-col justify-center space-y-5 relative overflow-hidden bg-base-100"
+              className="p-4 sm:p-6 font-mono text-xs sm:text-sm leading-relaxed min-h-72 sm:min-h-87.5 flex flex-col justify-center space-y-4 sm:space-y-5 relative overflow-hidden bg-base-100"
             >
               {abstractCodeLines.map((line, idx) => (
                 <motion.div
                   key={line.id}
                   variants={codeLineRowVariants}
-                  className="flex items-center gap-4 z-0"
+                  className="flex items-center gap-2 sm:gap-4 z-0"
                 >
                   {/* Line Numbers */}
-                  <span className="select-none opacity-40 text-xs font-mono w-5 text-right text-base-content/50 font-semibold">
+                  <span className="select-none opacity-40 text-[10px] sm:text-xs font-mono w-4 sm:w-5 text-right text-base-content/50 font-semibold shrink-0">
                     {String(idx + 1).padStart(2, "0")}
                   </span>
 
                   {/* Indented Code Segments */}
                   <div
-                    className="flex items-center gap-2.5 flex-1"
-                    style={{ paddingLeft: `${line.indent * 1.5}rem` }}
+                    className="flex items-center gap-1.5 sm:gap-2.5 flex-1 min-w-0"
+                    style={{ paddingLeft: `calc(${line.indent} * clamp(0.75rem, 3vw, 1.5rem))` }}
                   >
                     {line.segments.map((seg, sIdx) => (
                       <motion.span
                         key={sIdx}
                         variants={segmentBarVariants}
                         style={{ originX: 0 }}
-                        className={`h-2 rounded-full ${seg.width} ${seg.color} transition-all duration-300 hover:brightness-125`}
+                        className={`h-1.5 sm:h-2 rounded-full shrink-0 ${seg.width} ${seg.color} transition-all duration-300 hover:brightness-125`}
                       />
                     ))}
                   </div>
@@ -236,7 +236,7 @@ export default function HeroCodeSection() {
               ))}
 
               {/* Window Footer Telemetry */}
-              <div className="pt-4 mt-3 flex items-center justify-between border-t border-base-300 text-[11px] text-base-content/60 font-mono">
+              <div className="pt-3 sm:pt-4 mt-2 sm:mt-3 flex flex-wrap items-center justify-between gap-2 border-t border-base-300 text-[10px] sm:text-[11px] text-base-content/60 font-mono">
                 <span className="flex items-center gap-1.5 text-spotify font-medium">
                   <span>✓</span> Automated Generation Active
                 </span>
@@ -272,7 +272,7 @@ export default function HeroCodeSection() {
 
           {/* AI Tools Staggered Scroll Reveal */}
           <motion.div
-            className="flex flex-wrap items-center gap-4 pt-2"
+            className="flex flex-wrap items-center gap-3 sm:gap-4 pt-2"
             variants={containerVariants}
             initial="hidden"
             whileInView="visible"
@@ -289,7 +289,7 @@ export default function HeroCodeSection() {
                   boxShadow: `0 12px 24px -6px ${tool.brandColor}55`,
                 }}
                 whileTap={{ scale: 0.9 }}
-                className="relative group flex items-center justify-center w-13 h-13 rounded-full bg-base-100/90 backdrop-blur-md border border-base-300 shadow-md cursor-pointer transition-all duration-300"
+                className="relative group flex items-center justify-center w-11 h-11 sm:w-13 sm:h-13 rounded-full bg-base-100/90 backdrop-blur-md border border-base-300 shadow-md cursor-pointer transition-all duration-300"
                 style={{
                   borderColor: `${tool.brandColor}45`,
                   backgroundColor: `${tool.brandColor}12`,
@@ -297,7 +297,7 @@ export default function HeroCodeSection() {
                 title={tool.name}
               >
                 <tool.icon
-                  className="text-2xl transition-transform duration-300 group-hover:scale-110 group-hover:drop-shadow-md"
+                  className="text-xl sm:text-2xl transition-transform duration-300 group-hover:scale-110 group-hover:drop-shadow-md"
                   style={{ color: tool.brandColor }}
                 />
                 {/* Tooltip on hover */}

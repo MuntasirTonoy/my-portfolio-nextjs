@@ -10,6 +10,7 @@ import {
   RemoveBtn,
   AddBtn,
 } from "@/components/admin/AdminComponents";
+import { AdminFormSkeleton } from "@/components/ui/Skeleton";
 
 const SkillsEditor = () => {
   const { portfolioData, updateSection, resetSection, loading } = useAdmin();
@@ -22,11 +23,7 @@ const SkillsEditor = () => {
   }, [portfolioData?.skills]);
 
   if (loading || !data)
-    return (
-      <div className="flex justify-center py-20">
-        <span className="loading loading-spinner loading-lg text-spotify"></span>
-      </div>
-    );
+    return <AdminFormSkeleton />;
 
   const setCategoryName = (ci, val) => {
     const arr = [...data];

@@ -4,6 +4,7 @@ import React, { useState, useMemo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import ProjectCard from "@/components/ui/ProjectCard";
 import { ProjectSkeleton } from "@/components/ui/Skeleton";
+import Skeleton from "@/components/ui/Skeleton";
 import { BiSearch } from "react-icons/bi";
 import { usePortfolio } from "@/components/providers/AdminProvider";
 
@@ -127,7 +128,11 @@ const AllProjects = () => {
         {/* Results Info */}
         <div className="flex justify-between items-center mb-6">
           <h2 className="text-2xl font-semibold">
-            {loading ? "Loading Projects..." : `${filteredProjects.length} Projects Found`}
+            {loading ? (
+              <Skeleton width="200px" height="28px" rounded="rounded-lg" />
+            ) : (
+              `${filteredProjects.length} Projects Found`
+            )}
           </h2>
           {(searchQuery || techFilter || tagFilter || statusFilter) && !loading && (
             <button

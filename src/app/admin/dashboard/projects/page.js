@@ -4,6 +4,7 @@ import React, { useState, useEffect } from "react";
 import { useAdmin } from "@/components/providers/AdminProvider";
 import { SectionWrapper, Card, Field, Input, Textarea, SectionTitle, RemoveBtn, AddBtn, ImageUpload } from "@/components/admin/AdminComponents";
 import { WithContext as ReactTags } from 'react-tag-input';
+import { AdminFormSkeleton } from "@/components/ui/Skeleton";
 
 const KeyCodes = {
   comma: 188,
@@ -46,11 +47,7 @@ const ProjectsEditor = () => {
     }
   }, [portfolioData?.projects]);
 
-  if (loading || !projects) return (
-    <div className="flex justify-center py-20">
-      <span className="loading loading-spinner loading-lg text-spotify"></span>
-    </div>
-  );
+  if (loading || !projects) return <AdminFormSkeleton />;
 
   const setProject = (i, key, val) => {
     const arr = [...projects];

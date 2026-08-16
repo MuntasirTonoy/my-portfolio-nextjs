@@ -8,6 +8,7 @@ import { IoChatbubblesOutline } from "react-icons/io5";
 import HeroPhoto from "@/components/ui/HeroPhoto";
 import { motion } from "framer-motion";
 import { usePortfolio } from "@/components/providers/AdminProvider";
+import { HeroSkeleton } from "@/components/ui/Skeleton";
 
 /* Stagger container – children animate in sequence */
 const containerVariants = {
@@ -56,11 +57,7 @@ const particles = [
 const Hero = () => {
   const { portfolioData, loading } = usePortfolio();
   
-  if (loading || !portfolioData?.hero) return (
-    <div className="min-h-screen bg-base-200 flex items-center justify-center">
-      <span className="loading loading-spinner loading-lg text-spotify"></span>
-    </div>
-  );
+  if (loading || !portfolioData?.hero) return <HeroSkeleton />;
 
   const { hero } = portfolioData;
 

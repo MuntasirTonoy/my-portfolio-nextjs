@@ -201,23 +201,14 @@ const AdminLogin = () => {
               id="admin-login-btn"
               type="submit"
               disabled={loading}
-              className="w-full py-3 rounded-md font-bold text-sm tracking-wider transition-all duration-300 relative overflow-hidden cursor-pointer"
+              className="w-full py-3 rounded-md font-bold text-sm tracking-wider transition-all duration-300 relative overflow-hidden cursor-pointer disabled:opacity-70 disabled:cursor-not-allowed"
               style={{
-                background: loading
-                  ? "rgba(2,182,119,0.5)"
-                  : "linear-gradient(135deg, #02b677, #00955f)",
+                background: "linear-gradient(135deg, #02b677, #00955f)",
                 color: "white",
-                boxShadow: loading ? "none" : "0 4px 20px rgba(2,182,119,0.4)",
+                boxShadow: "0 4px 20px rgba(2,182,119,0.4)",
               }}
             >
-              {loading ? (
-                <span className="flex items-center justify-center gap-2">
-                  <span className="w-4 h-4 border-2 border-white/40 border-t-white rounded-full animate-spin" />
-                  Authenticating...
-                </span>
-              ) : (
-                "Access Dashboard"
-              )}
+              Access Dashboard
             </button>
 
             <p className="text-center text-xs text-base-content/30 pt-2">
@@ -286,25 +277,14 @@ const AdminLogin = () => {
                 <button
                   type="submit"
                   disabled={forgotLoading}
-                  className="w-full py-3 rounded-md font-bold text-sm tracking-wider transition-all duration-300 relative overflow-hidden cursor-pointer"
+                  className="w-full py-3 rounded-md font-bold text-sm tracking-wider transition-all duration-300 relative overflow-hidden cursor-pointer disabled:opacity-70 disabled:cursor-not-allowed"
                   style={{
-                    background: forgotLoading
-                      ? "rgba(2,182,119,0.5)"
-                      : "linear-gradient(135deg, #02b677, #00955f)",
+                    background: "linear-gradient(135deg, #02b677, #00955f)",
                     color: "white",
-                    boxShadow: forgotLoading
-                      ? "none"
-                      : "0 4px 15px rgba(2,182,119,0.3)",
+                    boxShadow: "0 4px 15px rgba(2,182,119,0.3)",
                   }}
                 >
-                  {forgotLoading ? (
-                    <span className="flex items-center justify-center gap-2">
-                      <span className="w-4 h-4 border-2 border-white/40 border-t-white rounded-full animate-spin" />
-                      Sending...
-                    </span>
-                  ) : (
-                    "Send Reset Link"
-                  )}
+                  Send Reset Link
                 </button>
               </form>
             </motion.div>

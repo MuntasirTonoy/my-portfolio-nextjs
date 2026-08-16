@@ -6,6 +6,7 @@ import { motion } from "framer-motion";
 import { FiLock, FiEye, FiEyeOff, FiShield } from "react-icons/fi";
 import { resetPassword } from "@/lib/api";
 import { toast } from "react-hot-toast";
+import Skeleton from "@/components/ui/Skeleton";
 
 const ResetForm = () => {
   const router = useRouter();
@@ -124,21 +125,12 @@ const ResetForm = () => {
             disabled={loading || !password || password !== confirmPassword}
             className="w-full py-3 rounded-md font-bold text-sm tracking-wider transition-all duration-300 relative overflow-hidden disabled:opacity-60 disabled:cursor-not-allowed cursor-pointer"
             style={{
-              background: (loading || !password || password !== confirmPassword)
-                ? "rgba(2,182,119,0.5)"
-                : "linear-gradient(135deg, #02b677, #00955f)",
+              background: "linear-gradient(135deg, #02b677, #00955f)",
               color: "white",
-              boxShadow: (loading || !password || password !== confirmPassword) ? "none" : "0 4px 20px rgba(2,182,119,0.4)",
+              boxShadow: "0 4px 20px rgba(2,182,119,0.4)",
             }}
           >
-            {loading ? (
-              <span className="flex items-center justify-center gap-2">
-                <span className="w-4 h-4 border-2 border-white/40 border-t-white rounded-full animate-spin" />
-                Resetting Password...
-              </span>
-            ) : (
-              "Reset Password"
-            )}
+            Reset Password
           </button>
         </>
       )}
@@ -198,9 +190,11 @@ const AdminResetPassword = () => {
 
           {/* Form wrapped in Suspense */}
           <Suspense fallback={
-            <div className="p-8 text-center">
-              <span className="loading loading-spinner text-spotify"></span>
-              <p className="text-xs text-base-content/50 mt-2">Loading Form...</p>
+            <div className="p-8 space-y-4">
+              <Skeleton width="200px" height="20px" className="mx-auto" />
+              <Skeleton className="w-full" height="44px" />
+              <Skeleton className="w-full" height="44px" />
+              <Skeleton className="w-full" height="48px" />
             </div>
           }>
             <ResetForm />
