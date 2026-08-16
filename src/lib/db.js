@@ -1,12 +1,6 @@
 import mongoose from 'mongoose';
-import dns from 'dns';
 
-// Fallback to Google/Cloudflare DNS to fix querySrv ECONNREFUSED on local ISPs/Windows
-try {
-  dns.setServers(['8.8.8.8', '1.1.1.1']);
-} catch (e) {
-  // Ignore if custom DNS resolution is restricted
-}
+const MONGO_URI = process.env.MONGO_DIRECT_URI || process.env.MONGO_URI;
 
 let cached = global.mongoose;
 
@@ -15,8 +9,6 @@ if (!cached) {
 }
 
 async function connectDB() {
-  const MONGO_URI = process.env.MONGO_URI;
-
   if (!MONGO_URI) {
     throw new Error('Please define the MONGO_URI environment variable inside .env');
   }
