@@ -170,7 +170,7 @@ const ProjectsEditor = () => {
                         tagInputField: 'input input-bordered w-full bg-base-100/50 rounded-md focus:border-spotify/50 transition-all text-sm',
                         selected: 'flex flex-wrap gap-2',
                         tag: 'flex items-center gap-1 bg-[#02b677]/20 text-[#02b677] px-3 py-1 rounded-md text-xs font-semibold',
-                        remove: 'cursor-pointer ml-1 font-bold text-red-500 hover:text-red-700',
+                        remove: 'ReactTags__remove cursor-pointer ml-1 font-bold text-red-500 hover:text-red-700',
                         suggestions: 'absolute z-10 mt-1 w-full bg-base-200 border border-base-300 rounded-md shadow-lg',
                         activeSuggestion: 'bg-base-300 cursor-pointer px-4 py-2 text-sm',
                       }}
@@ -208,7 +208,9 @@ const ProjectsEditor = () => {
                           tagInputField: 'input input-bordered w-full bg-base-100/50 rounded-md focus:border-spotify/50 transition-all text-sm',
                           selected: 'flex flex-wrap gap-2',
                           tag: 'flex items-center gap-1 bg-base-200 text-base-content/70 px-2 py-1 rounded-md text-xs font-medium border border-base-300',
-                          remove: 'cursor-pointer ml-1 font-bold hover:text-red-500',
+                          // Keep "ReactTags__remove": the library looks up remove buttons by
+                          // that class to move focus after a delete, and crashes without it.
+                          remove: 'ReactTags__remove cursor-pointer ml-1 font-bold hover:text-red-500',
                           suggestions: 'absolute z-10 mt-1 w-full bg-base-200 border border-base-300 rounded-md shadow-lg',
                           activeSuggestion: 'bg-base-300 cursor-pointer px-4 py-2 text-sm',
                         }}

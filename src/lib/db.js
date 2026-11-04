@@ -11,7 +11,9 @@ export default async function connectDB() {
   }
   if (cached.conn) return cached.conn;
 
-  cached.promise ??= mongoose.connect(MONGO_URI);
+  // MONGO_DB_NAME overrides the database in the URI path (if any).
+  const dbName = process.env.MONGO_DB_NAME || undefined;
+  cached.promise ??= mongoose.connect(MONGO_URI, { dbName });
 
   try {
     cached.conn = await cached.promise;

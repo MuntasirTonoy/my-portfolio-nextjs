@@ -14,8 +14,12 @@ const MB = 1024 * 1024;
 
 // The admin uploads project/profile images; anonymous visitors may only
 // upload a small avatar with their review, and are rate limited.
-const ADMIN_POLICY = { maxBytes: 5 * MB, folder: "portfolio_projects" };
-const PUBLIC_POLICY = { maxBytes: 2 * MB, folder: "review_avatars" };
+// CLOUDINARY_FOLDER (optional) groups everything under one parent folder.
+const BASE = process.env.CLOUDINARY_FOLDER?.trim().replace(/^\/+|\/+$/g, "");
+const inBase = (name) => (BASE ? `${BASE}/${name}` : name);
+
+const ADMIN_POLICY = { maxBytes: 5 * MB, folder: inBase("portfolio_projects") };
+const PUBLIC_POLICY = { maxBytes: 2 * MB, folder: inBase("review_avatars") };
 
 function uploadBuffer(buffer, folder) {
   return new Promise((resolve, reject) => {

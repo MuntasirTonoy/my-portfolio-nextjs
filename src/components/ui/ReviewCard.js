@@ -7,10 +7,8 @@ import RemoteImage from "@/components/ui/RemoteImage";
 const ReviewCard = ({ name, role, review, avatar, rating }) => {
   return (
     <motion.div
-      initial={{ opacity: 0, scale: 0.95 }}
-      whileInView={{ opacity: 1, scale: 1 }}
-      whileHover={{ y: -8 }}
-      transition={{ duration: 0.4 }}
+      whileHover={{ y: -6 }}
+      transition={{ duration: 0.3, ease: "easeOut" }}
       className="relative flex flex-col p-8 bg-base-300/50 backdrop-blur-sm rounded-3xl h-full min-h-[380px] w-full max-w-sm mx-auto text-left border border-base-content/5 hover:border-spotify/20 transition-all duration-500 group"
     >
       {/* Subtle Gradient Glow */}
@@ -35,7 +33,7 @@ const ReviewCard = ({ name, role, review, avatar, rating }) => {
               {name?.charAt(0)?.toUpperCase() || "?"}
             </div>
           )}
-          <div className="absolute -bottom-2 -right-2 bg-spotify p-1.5 rounded-lg shadow-lg">
+          <div className="absolute -bottom-2 -right-2 bg-spotify p-1.5 rounded-lg shadow-lg transition-transform duration-300 group-hover:rotate-12 group-hover:scale-110">
             <FaQuoteLeft className="text-white text-[10px]" />
           </div>
         </div>

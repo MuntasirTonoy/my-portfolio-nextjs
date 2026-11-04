@@ -1,5 +1,6 @@
 import "./globals.css";
 import { Poppins } from "next/font/google";
+import Script from "next/script";
 import { Toaster } from "react-hot-toast";
 import { ThemeProvider, themeInitScript } from "@/components/providers/ThemeProvider";
 import { SITE_URL, SITE_NAME, AUTHOR_NAME } from "@/lib/site";
@@ -62,7 +63,9 @@ export default function RootLayout({ children }) {
   return (
     <html lang="en" className={poppins.variable} suppressHydrationWarning>
       <head>
-        <script dangerouslySetInnerHTML={{ __html: themeInitScript }} />
+        <Script id="theme-init" strategy="beforeInteractive">
+          {themeInitScript}
+        </Script>
       </head>
       <body>
         <ThemeProvider>
