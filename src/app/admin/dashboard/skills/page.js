@@ -1,7 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
-import { useAdmin } from "@/components/providers/AdminProvider";
+import { useSectionDraft } from "@/components/admin/useSectionDraft";
 import {
   SectionWrapper,
   Card,
@@ -11,18 +10,12 @@ import {
   AddBtn,
 } from "@/components/admin/AdminComponents";
 import { AdminFormSkeleton } from "@/components/ui/Skeleton";
+import RemoteImage from "@/components/ui/RemoteImage";
 
 const SkillsEditor = () => {
-  const { portfolioData, updateSection, resetSection, loading } = useAdmin();
-  const [data, setData] = useState(null);
+  const { draft: data, setDraft: setData, loading, save, reset } = useSectionDraft("skills", { list: true });
 
-  useEffect(() => {
-    if (portfolioData?.skills) {
-      setData(portfolioData.skills);
-    }
-  }, [portfolioData?.skills]);
-
-  if (loading || !data)
+  if (loading)
     return <AdminFormSkeleton />;
 
   const setCategoryName = (ci, val) => {
@@ -69,11 +62,8 @@ const SkillsEditor = () => {
     <SectionWrapper
       title="Skills / Tech Stack"
       description="Add or remove skill categories and individual skill items with icons."
-      onSave={() => updateSection("skills", data)}
-      onReset={() => {
-        resetSection?.("skills");
-        setData(portfolioData.skills);
-      }}
+      onSave={save}
+      onReset={reset}
     >
       {data.map((cat, ci) => (
         <Card key={ci}>
@@ -115,11 +105,12 @@ const SkillsEditor = () => {
                 </div>
                 <div className="flex items-center gap-2">
                   {skill.icon && (
-                    <img
+                    <RemoteImage
                       src={skill.icon}
                       alt={skill.name}
+                      width={32}
+                      height={32}
                       className="w-8 h-8 object-contain rounded"
-                      onError={(e) => (e.target.style.display = "none")}
                     />
                   )}
                   <RemoveBtn onClick={() => removeSkill(ci, si)} />

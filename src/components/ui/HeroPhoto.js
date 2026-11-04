@@ -10,6 +10,7 @@ import {
   SiJavascript,
   SiTypescript,
 } from "react-icons/si";
+import RemoteImage from "@/components/ui/RemoteImage";
 
 const photo =
   "https://i.ibb.co.com/kss7vSR8/486576202-1787487388480587-6687481655588993159-n.jpg";
@@ -329,11 +330,13 @@ const HeroPhoto = () => {
                 "radial-gradient(ellipse at 30% 20%, rgba(2,182,119,0.18) 0%, transparent 60%)",
             }}
           />
-          <img
+          <RemoteImage
             src={photo}
-            alt="Muntasir – Full Stack Developer"
-            loading="eager"
-            className="w-full h-full object-cover rounded-full block"
+            alt="Md Muntasir Mahmud – Full-Stack Developer"
+            fill
+            priority
+            sizes="(min-width: 1024px) 320px, 200px"
+            className="object-cover rounded-full"
           />
         </motion.div>
 

@@ -1,34 +1,23 @@
 "use client";
 
-import React from "react";
 import { FaExternalLinkAlt, FaGithub } from "react-icons/fa";
-import Link from "next/link";
-import { useParams } from "next/navigation";
-import { ProjectDetailsSkeleton } from "@/components/ui/Skeleton";
-import Button from "@/components/ui/Button";
-import { usePortfolio } from "@/components/providers/AdminProvider";
 import { GoDotFill } from "react-icons/go";
+import Button from "@/components/ui/Button";
+import RemoteImage from "@/components/ui/RemoteImage";
 
-const ProjectDetails = () => {
-  const params = useParams();
-  const id = params.id;
-  const { portfolioData, loading } = usePortfolio();
+const TECH_GROUPS = [
+  { key: "frontend", label: "Frontend:", className: "bg-blue-500/10 text-blue-400 border-blue-500/20" },
+  { key: "backend", label: "Backend:", className: "bg-green-500/10 text-green-400 border-green-500/20" },
+  { key: "other", label: "Tools & Infrastructure:", className: "bg-purple-500/10 text-purple-400 border-purple-500/20" },
+];
 
-  // Find project in the global projects array
-  const projects = portfolioData?.projects || [];
-  const project = projects.find((p) => p._id === id || p.id?.toString() === id);
+const LINKS = [
+  { key: "liveDemo", label: "Live Demo", Icon: FaExternalLinkAlt },
+  { key: "clientSide", label: "Client Repo", Icon: FaGithub },
+  { key: "serverSide", label: "Server Repo", Icon: FaGithub },
+];
 
-  if (loading) return <ProjectDetailsSkeleton />;
-  if (!project)
-    return (
-      <div className="min-h-screen flex flex-col items-center justify-center space-y-4">
-        <p className="text-2xl font-bold">Project not found</p>
-        <Link href="/projects">
-          <Button>Back to Projects</Button>
-        </Link>
-      </div>
-    );
-
+const ProjectDetails = ({ project }) => {
   const {
     image,
     title,
@@ -48,13 +37,18 @@ const ProjectDetails = () => {
         {/* Left Section */}
         <div>
           {/* Project Image */}
-          <div className="overflow-hidden rounded-xl border border-base-100 mb-6">
-            <img
-              src={image}
-              alt={title}
-              className="w-full h-auto object-cover hover:scale-105 transition-transform duration-500"
-            />
-          </div>
+          {image && (
+            <div className="relative aspect-video overflow-hidden rounded-xl border border-base-100 mb-6">
+              <RemoteImage
+                src={image}
+                alt={title}
+                fill
+                priority
+                sizes="(min-width: 1024px) 576px, 100vw"
+                className="object-cover hover:scale-105 transition-transform duration-500"
+              />
+            </div>
+          )}
 
           {/* Project Name */}
           <h1 className="text-3xl font-extrabold mb-5">{title}</h1>
@@ -82,89 +76,30 @@ const ProjectDetails = () => {
           <div className="mt-8 space-y-6">
             <h2 className="text-xl font-bold">Tech Stack</h2>
 
-            {tech?.frontend?.length > 0 && (
-              <div>
-                <h3 className="font-semibold text-sm mb-2 text-base-content/60">
-                  Frontend:
-                </h3>
-                <div className="flex flex-wrap gap-2">
-                  {tech.frontend.map((t, idx) => (
-                    <span
-                      key={idx}
-                      className="px-3 py-1 bg-blue-500/10 text-blue-400 border border-blue-500/20 rounded-lg text-sm"
-                    >
-                      {t}
-                    </span>
-                  ))}
+            {TECH_GROUPS.map(({ key, label, className }) =>
+              tech?.[key]?.length > 0 ? (
+                <div key={key}>
+                  <h3 className="font-semibold text-sm mb-2 text-base-content/60">{label}</h3>
+                  <div className="flex flex-wrap gap-2">
+                    {tech[key].map((t) => (
+                      <span key={t} className={`px-3 py-1 border rounded-lg text-sm ${className}`}>
+                        {t}
+                      </span>
+                    ))}
+                  </div>
                 </div>
-              </div>
-            )}
-
-            {tech?.backend?.length > 0 && (
-              <div>
-                <h3 className="font-semibold text-sm mb-2 text-base-content/60">
-                  Backend:
-                </h3>
-                <div className="flex flex-wrap gap-2">
-                  {tech.backend.map((t, idx) => (
-                    <span
-                      key={idx}
-                      className="px-3 py-1 bg-green-500/10 text-green-400 border border-green-500/20 rounded-lg text-sm"
-                    >
-                      {t}
-                    </span>
-                  ))}
-                </div>
-              </div>
-            )}
-
-            {tech?.other?.length > 0 && (
-              <div>
-                <h3 className="font-semibold text-sm mb-2 text-base-content/60">
-                  Tools & Infrastructure:
-                </h3>
-                <div className="flex flex-wrap gap-2">
-                  {tech.other.map((t, idx) => (
-                    <span
-                      key={idx}
-                      className="px-3 py-1 bg-purple-500/10 text-purple-400 border border-purple-500/20 rounded-lg text-sm"
-                    >
-                      {t}
-                    </span>
-                  ))}
-                </div>
-              </div>
+              ) : null
             )}
           </div>
 
           {/* Links */}
           <div className="flex flex-wrap gap-4 mt-8">
-            {links?.liveDemo && (
-              <a href={links.liveDemo} target="_blank" rel="noopener noreferrer">
-                <Button>
-                  <span className="flex items-center gap-2">
-                    Live Demo <FaExternalLinkAlt size={14} />
-                  </span>
+            {LINKS.map(({ key, label, Icon }) =>
+              links?.[key] ? (
+                <Button key={key} href={links[key]} external>
+                  {label} <Icon size={14} />
                 </Button>
-              </a>
-            )}
-            {links?.clientSide && (
-              <a href={links.clientSide} target="_blank" rel="noopener noreferrer">
-                <Button>
-                  <span className="flex items-center gap-2">
-                    Client Repo <FaGithub size={14} />
-                  </span>
-                </Button>
-              </a>
-            )}
-            {links?.serverSide && (
-              <a href={links.serverSide} target="_blank" rel="noopener noreferrer">
-                <Button>
-                  <span className="flex items-center gap-2">
-                    Server Repo <FaGithub size={14} />
-                  </span>
-                </Button>
-              </a>
+              ) : null
             )}
           </div>
         </div>

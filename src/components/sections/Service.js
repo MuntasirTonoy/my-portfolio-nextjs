@@ -1,11 +1,9 @@
 "use client";
 
-import React from "react";
 import { motion } from "framer-motion";
 import { FaCode, FaServer, FaDatabase, FaLaptopCode  } from "react-icons/fa";
 import ServiceCard from "@/components/ui/ServiceCard";
-import { usePortfolio } from "@/components/providers/AdminProvider";
-import { SectionSkeleton } from "@/components/ui/Skeleton";
+import { usePortfolio } from "@/components/providers/PortfolioProvider";
 
 const defaultIcons = [
   <FaCode size={40} className="text-spotify" key="code" />,
@@ -15,12 +13,8 @@ const defaultIcons = [
 ];
 
 const Services = () => {
-  const { portfolioData, loading } = usePortfolio();
-
-  if (loading) return <SectionSkeleton />;
-  if (!portfolioData?.services) return null;
-
-  const { services } = portfolioData;
+  const { services } = usePortfolio();
+  if (!services) return null;
 
   return (
     <section className="bg-base-100 py-20">

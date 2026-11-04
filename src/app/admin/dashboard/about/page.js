@@ -1,21 +1,13 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
-import { useAdmin } from "@/components/providers/AdminProvider";
+import { useSectionDraft } from "@/components/admin/useSectionDraft";
 import { SectionWrapper, Card, Field, Input, Textarea, SectionTitle, ImageUpload, RemoveBtn, AddBtn } from "@/components/admin/AdminComponents";
 import Skeleton, { CardSkeleton } from "@/components/ui/Skeleton";
 
 const AboutEditor = () => {
-  const { portfolioData, updateSection, resetSection, loading } = useAdmin();
-  const [data, setData] = useState(null);
+  const { draft: data, setDraft: setData, loading, save, reset } = useSectionDraft("about");
 
-  useEffect(() => { 
-    if (portfolioData?.about) {
-      setData(portfolioData.about); 
-    }
-  }, [portfolioData?.about]);
-
-  if (loading || !data) return (
+  if (loading) return (
     <div className="space-y-6">
       <Skeleton width="200px" height="32px" />
       <CardSkeleton />
@@ -64,8 +56,8 @@ const AboutEditor = () => {
     <SectionWrapper
       title="About Page"
       description="Edit your profile info, bio paragraphs, education, and journey timeline."
-      onSave={() => updateSection("about", data)}
-      onReset={() => { resetSection?.("about"); setData(portfolioData.about); }}
+      onSave={save}
+      onReset={reset}
     >
       {/* Basic Profile */}
       <Card>

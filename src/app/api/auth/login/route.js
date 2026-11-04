@@ -1,32 +1,28 @@
-import { NextResponse } from 'next/server';
-import jwt from 'jsonwebtoken';
-import connectDB from '@/lib/db';
-import User from '@/models/User';
-
-const generateToken = (id) => {
-  return jwt.sign({ id }, process.env.JWT_SECRET, {
-    expiresIn: '30d',
-  });
-};
+import connectDB from "@/lib/db";
+import User from "@/models/User";
+import { signSession, setSessionCookie } from "@/lib/auth";
+import { json, fail, handleError, clientIp } from "@/lib/http";
+import { rateLimit, MINUTE } from "@/lib/rateLimit";
 
 export async function POST(req) {
+  const limited = rateLimit(`login:${clientIp(req)}`, { limit: 5, windowMs: 15 * MINUTE });
+  if (!limited.ok) return fail("Too many login attempts. Try again later.", 429);
+
   try {
-    await connectDB();
     const { email, password } = await req.json();
-
-    const user = await User.findOne({ email });
-
-    if (user && (await user.matchPassword(password))) {
-      return NextResponse.json({
-        _id: user._id,
-        email: user.email,
-        token: generateToken(user._id),
-      });
-    } else {
-      return NextResponse.json({ message: 'Invalid email or password' }, { status: 401 });
+    if (typeof email !== "string" || typeof password !== "string") {
+      return fail("Email and password are required");
     }
+
+    await connectDB();
+    const user = await User.findByEmail(email);
+    if (!user || !(await user.matchPassword(password))) {
+      return fail("Invalid email or password", 401);
+    }
+
+    const res = json({ _id: user._id, email: user.email });
+    return setSessionCookie(res, signSession(user._id));
   } catch (error) {
-    console.error('Login error:', error);
-    return NextResponse.json({ message: 'Server error', error: error.message }, { status: 500 });
+    return handleError("Login error", error);
   }
 }

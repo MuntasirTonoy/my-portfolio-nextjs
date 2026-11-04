@@ -1,6 +1,7 @@
 import mongoose from 'mongoose';
 
 const projectSchema = new mongoose.Schema({
+  order: { type: Number, default: 0, index: true },
   image: String,
   title: String,
   description: String,

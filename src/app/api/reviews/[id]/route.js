@@ -1,53 +1,40 @@
-import { NextResponse } from 'next/server';
-import connectDB from '@/lib/db';
-import Review from '@/models/Review';
-import { verifyAuth } from '@/lib/auth';
+import connectDB from "@/lib/db";
+import Review from "@/models/Review";
+import { verifyAuth } from "@/lib/auth";
+import { revalidateReviews } from "@/lib/portfolio";
+import { json, fail, handleError } from "@/lib/http";
 
 export async function PUT(req, { params }) {
   try {
-    const user = await verifyAuth(req);
-    if (!user) {
-      return NextResponse.json({ message: 'Not authorized' }, { status: 401 });
-    }
+    if (!(await verifyAuth(req))) return fail("Not authorized", 401);
+
+    const { id } = await params;
+    const { isPublished } = await req.json();
+    if (typeof isPublished !== "boolean") return fail("isPublished must be a boolean");
 
     await connectDB();
-    const { id } = await params;
-    const body = await req.json();
+    const review = await Review.findByIdAndUpdate(id, { isPublished }, { new: true });
+    if (!review) return fail("Review not found", 404);
 
-    const review = await Review.findById(id);
-    if (!review) {
-      return NextResponse.json({ message: 'Review not found' }, { status: 404 });
-    }
-
-    review.isPublished = body.isPublished !== undefined ? body.isPublished : review.isPublished;
-    const updatedReview = await review.save();
-
-    return NextResponse.json(updatedReview);
+    revalidateReviews();
+    return json(review);
   } catch (error) {
-    console.error('Update review error:', error);
-    return NextResponse.json({ message: error.message }, { status: 400 });
+    return handleError("Update review error", error);
   }
 }
 
 export async function DELETE(req, { params }) {
   try {
-    const user = await verifyAuth(req);
-    if (!user) {
-      return NextResponse.json({ message: 'Not authorized' }, { status: 401 });
-    }
+    if (!(await verifyAuth(req))) return fail("Not authorized", 401);
 
-    await connectDB();
     const { id } = await params;
+    await connectDB();
+    const review = await Review.findByIdAndDelete(id);
+    if (!review) return fail("Review not found", 404);
 
-    const review = await Review.findById(id);
-    if (!review) {
-      return NextResponse.json({ message: 'Review not found' }, { status: 404 });
-    }
-
-    await review.deleteOne();
-    return NextResponse.json({ message: 'Review removed' });
+    revalidateReviews();
+    return json({ message: "Review removed" });
   } catch (error) {
-    console.error('Delete review error:', error);
-    return NextResponse.json({ message: error.message }, { status: 500 });
+    return handleError("Delete review error", error);
   }
 }

@@ -1,36 +1,39 @@
-import { NextResponse } from 'next/server';
-import connectDB from '@/lib/db';
-import User from '@/models/User';
-import { verifyAuth } from '@/lib/auth';
+import connectDB from "@/lib/db";
+import User from "@/models/User";
+import { verifyAuth, signSession, setSessionCookie } from "@/lib/auth";
+import { json, fail, handleError, isValidEmail, passwordError } from "@/lib/http";
 
 export async function PUT(req) {
   try {
-    const userFromToken = await verifyAuth(req);
-    if (!userFromToken) {
-      return NextResponse.json({ message: 'Not authorized' }, { status: 401 });
+    const sessionUser = await verifyAuth(req);
+    if (!sessionUser) return fail("Not authorized", 401);
+
+    const { currentPassword, newPassword, newEmail } = await req.json();
+
+    if (newPassword) {
+      const error = passwordError(newPassword);
+      if (error) return fail(error);
+    }
+    if (newEmail && !isValidEmail(newEmail)) {
+      return fail("Please enter a valid email address");
     }
 
     await connectDB();
-    const { currentPassword, newPassword, newEmail } = await req.json();
-    const user = await User.findById(userFromToken._id);
-
-    if (user && (await user.matchPassword(currentPassword))) {
-      if (newPassword) user.password = newPassword;
-      if (newEmail) user.email = newEmail;
-
-      await user.save();
-      return NextResponse.json({
-        message: 'Account updated successfully',
-        user: {
-          _id: user._id,
-          email: user.email
-        }
-      });
-    } else {
-      return NextResponse.json({ message: 'Invalid current password' }, { status: 401 });
+    const user = await User.findById(sessionUser._id);
+    if (!user || !(await user.matchPassword(currentPassword || ""))) {
+      return fail("Invalid current password", 401);
     }
+
+    if (newPassword) user.password = newPassword;
+    if (newEmail) user.email = newEmail;
+    await user.save();
+
+    const res = json({
+      message: "Account updated successfully",
+      user: { _id: user._id, email: user.email },
+    });
+    return setSessionCookie(res, signSession(user._id));
   } catch (error) {
-    console.error('Update password error:', error);
-    return NextResponse.json({ message: 'Server error' }, { status: 500 });
+    return handleError("Update account error", error);
   }
 }

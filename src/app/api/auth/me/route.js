@@ -1,15 +1,12 @@
-import { NextResponse } from 'next/server';
-import { verifyAuth } from '@/lib/auth';
+import { verifyAuth } from "@/lib/auth";
+import { json, fail, handleError } from "@/lib/http";
 
 export async function GET(req) {
   try {
     const user = await verifyAuth(req);
-    if (!user) {
-      return NextResponse.json({ message: 'Not authorized' }, { status: 401 });
-    }
-    return NextResponse.json(user);
+    if (!user) return fail("Not authorized", 401);
+    return json({ _id: user._id, email: user.email });
   } catch (error) {
-    console.error('Get user profile error:', error);
-    return NextResponse.json({ message: 'Server error' }, { status: 500 });
+    return handleError("Get user profile error", error);
   }
 }

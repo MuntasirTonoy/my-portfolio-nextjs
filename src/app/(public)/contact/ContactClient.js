@@ -1,10 +1,10 @@
 "use client";
 
-import React, { useState } from "react";
-import Button from "@/components/ui/Button";
+import { useState } from "react";
 import { useForm } from "react-hook-form";
-import emailjs from "emailjs-com";
-import Swal from "sweetalert2";
+import emailjs from "@emailjs/browser";
+import toast from "react-hot-toast";
+import { motion, AnimatePresence } from "framer-motion";
 import {
   FaEnvelope,
   FaPhone,
@@ -13,19 +13,48 @@ import {
   FaMapMarkerAlt,
   FaStar,
 } from "react-icons/fa";
-import Link from "next/link";
-import { motion, AnimatePresence } from "framer-motion";
-import { usePortfolio } from "@/components/providers/AdminProvider";
-import { ContactSkeleton } from "@/components/ui/Skeleton";
-import { createReview, uploadImage } from "@/lib/api";
+import Button from "@/components/ui/Button";
+import RemoteImage from "@/components/ui/RemoteImage";
+import { usePortfolio } from "@/components/providers/PortfolioProvider";
+import { createReview, uploadImage, errorMessage } from "@/lib/api";
+
+const EMAILJS = {
+  serviceId: process.env.NEXT_PUBLIC_EMAILJS_SERVICE_ID,
+  templateId: process.env.NEXT_PUBLIC_EMAILJS_TEMPLATE_ID,
+  publicKey: process.env.NEXT_PUBLIC_EMAILJS_PUBLIC_KEY,
+};
+
+const MAX_AVATAR_BYTES = 2 * 1024 * 1024;
+
+const revealVariant = {
+  hidden: { opacity: 0, y: 30 },
+  visible: (delay = 0) => ({
+    opacity: 1,
+    y: 0,
+    transition: { duration: 0.6, delay },
+  }),
+};
+
+// Only rows with a value are shown; links are only built from real values.
+function buildContactInfo(contact) {
+  return [
+    contact.email && { icon: <FaEnvelope />, value: contact.email, link: `mailto:${contact.email}` },
+    contact.phone && { icon: <FaPhone />, value: contact.phone, link: `tel:${contact.phone.replace(/\s/g, "")}` },
+    contact.location && { icon: <FaMapMarkerAlt />, value: contact.location },
+    contact.socialLinks?.github && { icon: <FaGithub />, value: "GitHub Profile", link: contact.socialLinks.github, external: true },
+    contact.socialLinks?.linkedin && { icon: <FaLinkedin />, value: "LinkedIn Profile", link: contact.socialLinks.linkedin, external: true },
+  ].filter(Boolean);
+}
 
 const ContactClient = () => {
-  const { portfolioData, loading: globalLoading } = usePortfolio();
+  const { contact = {} } = usePortfolio();
   const [loading, setLoading] = useState(false);
   const [isReviewModalOpen, setIsReviewModalOpen] = useState(false);
   const [reviewLoading, setReviewLoading] = useState(false);
   const [rating, setRating] = useState(5);
   const [hoverRating, setHoverRating] = useState(0);
+  const [avatarFile, setAvatarFile] = useState(null);
+  const [avatarPreview, setAvatarPreview] = useState(null);
 
   const {
     register,
@@ -38,109 +67,49 @@ const ContactClient = () => {
     register: registerReview,
     handleSubmit: handleSubmitReview,
     reset: resetReview,
-    setValue: setReviewValue,
     formState: { errors: reviewErrors },
   } = useForm();
 
-  const [selectedAvatarFile, setSelectedAvatarFile] = useState(null);
-  const [avatarPreview, setAvatarPreview] = useState(null);
+  const contactInfo = buildContactInfo(contact);
 
   const handleAvatarUpload = (e) => {
-    const file = e.target.files[0];
+    const file = e.target.files?.[0];
     if (!file) return;
-
-    setSelectedAvatarFile(file);
+    if (file.size > MAX_AVATAR_BYTES) {
+      toast.error("Please choose an image smaller than 2 MB.");
+      e.target.value = "";
+      return;
+    }
+    if (avatarPreview) URL.revokeObjectURL(avatarPreview);
+    setAvatarFile(file);
     setAvatarPreview(URL.createObjectURL(file));
   };
 
   const removeAvatar = () => {
-    setSelectedAvatarFile(null);
+    if (avatarPreview) URL.revokeObjectURL(avatarPreview);
+    setAvatarFile(null);
     setAvatarPreview(null);
-    setReviewValue("avatar", "");
   };
 
-  if (globalLoading || !portfolioData?.contact) return <ContactSkeleton />;
-
-  const { contact } = portfolioData;
-
-  const contactInfo = [
-    {
-      icon: <FaEnvelope />,
-      value: contact.email || "mdmuntasir.dev@gmail.com",
-      link: `mailto:${contact.email}`,
-    },
-    {
-      icon: <FaPhone />,
-      value: contact.phone || "+8801783-424220",
-      link: `tel:${contact.phone}`,
-    },
-    {
-      icon: <FaMapMarkerAlt />,
-      value: contact.location || "Kushtia, Bangladesh",
-    },
-    {
-      icon: <FaGithub />,
-      value: "GitHub Profile",
-      link: contact?.socialLinks?.github,
-    },
-    {
-      icon: <FaLinkedin />,
-      value: "LinkedIn Profile",
-      link: contact?.socialLinks?.linkedin,
-    },
-  ];
-
-  const onContactSubmit = (data) => {
+  const onContactSubmit = async (data) => {
+    if (!EMAILJS.serviceId || !EMAILJS.templateId || !EMAILJS.publicKey) {
+      toast.error("The contact form isn't configured yet. Please email me directly.");
+      return;
+    }
     setLoading(true);
-    emailjs
-      .send(
-        process.env.NEXT_PUBLIC_EMAILJS_SERVICE_ID || "service_b24hywd",
-        process.env.NEXT_PUBLIC_EMAILJS_TEMPLATE_ID || "template_nrnbgbp",
-        {
-          name: data.name,
-          email: data.email,
-          message: data.message,
-        },
-        process.env.NEXT_PUBLIC_EMAILJS_PUBLIC_KEY || "w3L0GmacoYEpdGzIV",
-      )
-      .then(
-        () => {
-          setLoading(false);
-          Swal.fire("Success!", "Your message has been sent!", "success");
-          reset();
-        },
-        () => {
-          setLoading(false);
-          Swal.fire("Oops!", "Failed to send message. Try again.", "error");
-        },
-      );
-  };
-
-  const onReviewSubmit = async (data) => {
-    setReviewLoading(true);
     try {
-      let finalAvatarUrl = data.avatar || "";
-      if (selectedAvatarFile) {
-        const formData = new FormData();
-        formData.append("image", selectedAvatarFile);
-        const uploadData = await uploadImage(formData);
-        finalAvatarUrl = uploadData.url;
-      }
-
-      await createReview({ ...data, rating, avatar: finalAvatarUrl });
-      Swal.fire(
-        "Thank You!",
-        "Your review has been submitted and is now live!",
-        "success",
+      await emailjs.send(
+        EMAILJS.serviceId,
+        EMAILJS.templateId,
+        { name: data.name, email: data.email, message: data.message },
+        { publicKey: EMAILJS.publicKey }
       );
-      setIsReviewModalOpen(false);
-      resetReview();
-      setRating(5);
-      removeAvatar();
-    } catch (error) {
-      Swal.fire("Error", "Failed to submit review. Please try again.", "error");
+      toast.success("Your message has been sent!");
+      reset();
+    } catch {
+      toast.error("Failed to send message. Please try again.");
     } finally {
-      setReviewLoading(false);
+      setLoading(false);
     }
   };
 
@@ -151,13 +120,18 @@ const ContactClient = () => {
     removeAvatar();
   };
 
-  const revealVariant = {
-    hidden: { opacity: 0, y: 30 },
-    visible: (delay = 0) => ({
-      opacity: 1,
-      y: 0,
-      transition: { duration: 0.6, delay },
-    }),
+  const onReviewSubmit = async (data) => {
+    setReviewLoading(true);
+    try {
+      const avatar = avatarFile ? (await uploadImage(avatarFile)).url : undefined;
+      const res = await createReview({ ...data, rating, avatar });
+      toast.success(res.message || "Thanks! Your review will appear once it's approved.");
+      closeReviewModal();
+    } catch (error) {
+      toast.error(errorMessage(error, "Failed to submit review. Please try again."));
+    } finally {
+      setReviewLoading(false);
+    }
   };
 
   return (
@@ -172,26 +146,25 @@ const ContactClient = () => {
           viewport={{ once: false }}
           custom={0}
         >
-          <h2 className="text-4xl md:text-5xl font-extrabold text-spotify mb-8">
+          <h1 className="text-4xl md:text-5xl font-extrabold text-spotify mb-8">
             {contact.heading || "Get In Touch"}
-          </h2>
+          </h1>
           <p className="text-lg text-base-content/80 mb-8">
             {contact.description ||
               "Feel free to reach out for collaborations or just a friendly hello. I'll try my best to get back to you!"}
           </p>
 
           <ul className="space-y-4 mb-10">
-            {contactInfo.map((item, index) => (
+            {contactInfo.map((item) => (
               <li
-                key={index}
+                key={item.value}
                 className="flex items-start gap-4 text-lg text-base-content"
               >
-                <span className="mt-1 text-spotify">{item.icon}</span>
+                <span className="mt-1 text-spotify" aria-hidden="true">{item.icon}</span>
                 {item.link ? (
                   <a
                     href={item.link}
-                    target="_blank"
-                    rel="noopener noreferrer"
+                    {...(item.external && { target: "_blank", rel: "noopener noreferrer" })}
                     className="hover:text-spotify hover:underline transition-colors duration-200"
                   >
                     {item.value}
@@ -310,6 +283,15 @@ const ContactClient = () => {
                 onSubmit={handleSubmitReview(onReviewSubmit)}
                 className="space-y-4"
               >
+                {/* Honeypot: hidden from people, filled in by bots */}
+                <input
+                  type="text"
+                  tabIndex={-1}
+                  autoComplete="off"
+                  aria-hidden="true"
+                  className="hidden"
+                  {...registerReview("website")}
+                />
                 {/* Rating Selector */}
                 <div className="form-control mb-4">
                   <label className="label-text font-semibold mb-2">
@@ -320,6 +302,8 @@ const ContactClient = () => {
                       <button
                         key={star}
                         type="button"
+                        aria-label={`${star} star${star > 1 ? "s" : ""}`}
+                        aria-pressed={star === rating}
                         className="text-2xl transition-all duration-200"
                         onMouseEnter={() => setHoverRating(star)}
                         onMouseLeave={() => setHoverRating(0)}
@@ -345,7 +329,9 @@ const ContactClient = () => {
                     <input
                       {...registerReview("name", {
                         required: "Name is required",
+                        maxLength: { value: 80, message: "Max 80 characters" },
                       })}
+                      maxLength={80}
                       placeholder="Your Name"
                       className="input input-bordered w-full"
                     />
@@ -362,7 +348,9 @@ const ContactClient = () => {
                     <input
                       {...registerReview("role", {
                         required: "Role is required",
+                        maxLength: { value: 100, message: "Max 100 characters" },
                       })}
+                      maxLength={100}
                       placeholder="e.g. CEO, XYZ Corp"
                       className="input input-bordered w-full"
                     />
@@ -383,21 +371,17 @@ const ContactClient = () => {
                       <label className="cursor-pointer flex flex-col items-center justify-center w-full h-32 bg-base-200/50 border-2 border-dashed border-base-content/10 rounded-md text-sm hover:border-spotify transition-all font-medium">
                         <span className="text-2xl mb-2">📁</span>
                         <span>Upload Photo</span>
-                        <span className="text-xs text-base-content/50 mt-1">Click to browse</span>
+                        <span className="text-xs text-base-content/50 mt-1">JPG, PNG or WebP, up to 2 MB</span>
                         <input
                           type="file"
-                          accept="image/*"
+                          accept="image/jpeg,image/png,image/webp,image/gif"
                           className="hidden"
                           onChange={handleAvatarUpload}
                         />
                       </label>
                     ) : (
                       <div className="relative w-full h-32 rounded-md overflow-hidden border border-base-content/10 group">
-                        <img
-                          src={avatarPreview}
-                          alt="Preview"
-                          className="w-full h-full object-cover"
-                        />
+                        <RemoteImage src={avatarPreview} alt="Avatar preview" fill className="object-cover" />
                         <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
                           <button
                             type="button"
@@ -410,7 +394,6 @@ const ContactClient = () => {
                       </div>
                     )}
                   </div>
-                  <input type="hidden" {...registerReview("avatar")} />
                 </div>
 
                 <div className="form-control">
@@ -420,7 +403,10 @@ const ContactClient = () => {
                   <textarea
                     {...registerReview("review", {
                       required: "Review text is required",
+                      minLength: { value: 10, message: "Please write at least 10 characters" },
+                      maxLength: { value: 1000, message: "Max 1000 characters" },
                     })}
+                    maxLength={1000}
                     placeholder="Write your experience here..."
                     className="textarea textarea-bordered h-24 w-full"
                   />
@@ -468,11 +454,9 @@ const ContactClient = () => {
           question, or just want to connect—I’d love to hear from you!
         </p>
         <div className="flex flex-col sm:flex-row justify-center">
-          <Link href="/projects">
-            <Button>
-              <span className="font-bold">View My Projects</span>
-            </Button>
-          </Link>
+          <Button href="/projects">
+            <span className="font-bold">View My Projects</span>
+          </Button>
         </div>
       </motion.section>
     </div>

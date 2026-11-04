@@ -1,60 +1,52 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import { useState } from "react";
+import toast from "react-hot-toast";
 import { SectionWrapper, Card, Field, Input, PasswordInput, SectionTitle } from "@/components/admin/AdminComponents";
-import { updateAccountPassword } from "@/lib/api";
-import Swal from "sweetalert2";
+import { useAdmin } from "@/components/providers/AdminProvider";
+import { updateAccount, errorMessage } from "@/lib/api";
+
+const MIN_PASSWORD_LENGTH = 8;
+const EMPTY_PASSWORDS = { currentPassword: "", newPassword: "", confirmPassword: "" };
 
 const SettingsEditor = () => {
-  const [data, setData] = useState({
-    currentPassword: "",
-    newPassword: "",
-    confirmPassword: "",
-    newEmail: "",
-  });
-  const [loading, setLoading] = useState(false);
+  const { user, setUser } = useAdmin();
+  const [passwords, setPasswords] = useState(EMPTY_PASSWORDS);
+  // null = "not edited yet", so the field shows the current email once it loads.
+  const [emailDraft, setEmailDraft] = useState(null);
+  const [saving, setSaving] = useState(false);
 
-  useEffect(() => {
-    const adminUser = localStorage.getItem("admin_user");
-    if (adminUser) {
-      try {
-        const userObj = JSON.parse(adminUser);
-        if (userObj.email) {
-          setData((d) => ({ ...d, newEmail: userObj.email }));
-        }
-      } catch (err) {
-        console.error("Failed to parse admin_user from localStorage", err);
-      }
-    }
-  }, []);
-
-  const set = (key, val) => setData((d) => ({ ...d, [key]: val }));
+  const email = emailDraft ?? user?.email ?? "";
+  const setPassword = (key, val) => setPasswords((p) => ({ ...p, [key]: val }));
 
   const handleUpdate = async () => {
-    if (data.newPassword && data.newPassword !== data.confirmPassword) {
-      return Swal.fire("Error", "New passwords do not match", "error");
+    if (!passwords.currentPassword) {
+      return toast.error("Enter your current password to confirm changes");
+    }
+    if (passwords.newPassword) {
+      if (passwords.newPassword.length < MIN_PASSWORD_LENGTH) {
+        return toast.error(`New password must be at least ${MIN_PASSWORD_LENGTH} characters`);
+      }
+      if (passwords.newPassword !== passwords.confirmPassword) {
+        return toast.error("New passwords do not match");
+      }
     }
 
-    setLoading(true);
+    setSaving(true);
     try {
-      const resData = await updateAccountPassword(data);
-      Swal.fire("Success", resData.message || "Account settings updated successfully", "success");
-      
-      // Synchronize changes to local storage
-      if (resData.user) {
-        localStorage.setItem("admin_user", JSON.stringify(resData.user));
-      }
-      
-      setData({ 
-        currentPassword: "", 
-        newPassword: "", 
-        confirmPassword: "",
-        newEmail: resData.user?.email || data.newEmail
+      const res = await updateAccount({
+        currentPassword: passwords.currentPassword,
+        newPassword: passwords.newPassword || undefined,
+        newEmail: email !== user?.email ? email : undefined,
       });
+      toast.success(res.message || "Account settings updated successfully");
+      setUser(res.user);
+      setPasswords(EMPTY_PASSWORDS);
+      setEmailDraft(null);
     } catch (err) {
-      Swal.fire("Error", err.response?.data?.message || "Failed to update account", "error");
+      toast.error(errorMessage(err, "Failed to update account"));
     } finally {
-      setLoading(false);
+      setSaving(false);
     }
   };
 
@@ -62,14 +54,15 @@ const SettingsEditor = () => {
     <SectionWrapper
       title="Account Settings"
       description="Update your admin login credentials and security settings."
-      onSave={handleUpdate}
+      onSave={saving ? undefined : handleUpdate}
     >
       <Card>
         <SectionTitle>Admin Identity</SectionTitle>
         <Field label="Admin Email">
-          <Input 
-            value={data.newEmail} 
-            onChange={(e) => set("newEmail", e.target.value)} 
+          <Input
+            type="email"
+            value={email}
+            onChange={(e) => setEmailDraft(e.target.value)}
             placeholder="you@example.com"
           />
         </Field>
@@ -79,24 +72,24 @@ const SettingsEditor = () => {
         <SectionTitle>Change Password</SectionTitle>
         <div className="space-y-4">
           <Field label="Current Password">
-            <PasswordInput 
-              value={data.currentPassword} 
-              onChange={(e) => set("currentPassword", e.target.value)} 
+            <PasswordInput
+              value={passwords.currentPassword}
+              onChange={(e) => setPassword("currentPassword", e.target.value)}
               placeholder="••••••••"
             />
           </Field>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <Field label="New Password">
-              <PasswordInput 
-                value={data.newPassword} 
-                onChange={(e) => set("newPassword", e.target.value)} 
-                placeholder="New Password (optional)"
+              <PasswordInput
+                value={passwords.newPassword}
+                onChange={(e) => setPassword("newPassword", e.target.value)}
+                placeholder={`At least ${MIN_PASSWORD_LENGTH} characters (optional)`}
               />
             </Field>
             <Field label="Confirm New Password">
-              <PasswordInput 
-                value={data.confirmPassword} 
-                onChange={(e) => set("confirmPassword", e.target.value)} 
+              <PasswordInput
+                value={passwords.confirmPassword}
+                onChange={(e) => setPassword("confirmPassword", e.target.value)}
                 placeholder="Confirm New Password"
               />
             </Field>

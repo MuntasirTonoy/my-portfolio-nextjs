@@ -4,7 +4,9 @@ import React from "react";
 import { FiSave, FiRefreshCw, FiEye, FiEyeOff } from "react-icons/fi";
 import Button from "@/components/ui/Button";
 import Skeleton from "@/components/ui/Skeleton";
-import { uploadImage } from "@/lib/api";
+import toast from "react-hot-toast";
+import RemoteImage from "@/components/ui/RemoteImage";
+import { uploadImage, errorMessage } from "@/lib/api";
 
 // ── Reusable field components ──────────────────────────────────────────────
 
@@ -70,7 +72,7 @@ export const Input = ({
 }) => (
   <input
     type={type}
-    value={value}
+    value={value ?? ""}
     onChange={onChange}
     placeholder={placeholder}
     className="input input-bordered w-full bg-base-100/50 rounded-md focus:border-spotify/50 transition-all"
@@ -92,6 +94,7 @@ export const PasswordInput = ({ value, onChange, placeholder, ...rest }) => {
       />
       <button
         type="button"
+        aria-label={show ? "Hide password" : "Show password"}
         onClick={() => setShow(!show)}
         className="absolute right-4 top-1/2 -translate-y-1/2 text-base-content/30 hover:text-spotify transition-colors cursor-pointer"
       >
@@ -103,7 +106,7 @@ export const PasswordInput = ({ value, onChange, placeholder, ...rest }) => {
 
 export const Textarea = ({ value, onChange, placeholder, rows = 4 }) => (
   <textarea
-    value={value}
+    value={value ?? ""}
     onChange={onChange}
     placeholder={placeholder}
     rows={rows}
@@ -120,21 +123,25 @@ export const SectionTitle = ({ children }) => (
   </h3>
 );
 
-export const RemoveBtn = ({ onClick }) => (
+export const RemoveBtn = ({ onClick, label = "Remove" }) => (
   <button
+    type="button"
     onClick={onClick}
+    aria-label={label}
+    title={label}
     className="btn btn-circle btn-sm btn-ghost text-red-500 hover:bg-red-500/10 cursor-pointer"
   >
     ✕
   </button>
 );
 
-export const AddBtn = ({ onClick, children = "Add New" }) => (
+export const AddBtn = ({ onClick, label = "Add New" }) => (
   <button
+    type="button"
     onClick={onClick}
     className="btn btn-sm btn-ghost text-spotify gap-2 font-bold hover:bg-spotify/10 cursor-pointer"
   >
-    <span>+</span> {children}
+    <span aria-hidden="true">+</span> {label.replace(/^\+\s*/, "")}
   </button>
 );
 
@@ -150,15 +157,11 @@ export const ImageUpload = ({
     if (!file) return;
 
     setUploading(true);
-    const formData = new FormData();
-    formData.append("image", file);
-
     try {
-      const data = await uploadImage(formData);
+      const data = await uploadImage(file);
       onChange(data.url);
     } catch (error) {
-      console.error("Error uploading file:", error);
-      alert("Failed to upload image.");
+      toast.error(errorMessage(error, "Failed to upload image."));
     } finally {
       setUploading(false);
     }
@@ -185,9 +188,11 @@ export const ImageUpload = ({
         {uploading ? (
           <Skeleton width="48px" height="48px" rounded="rounded-md" />
         ) : value ? (
-          <img
+          <RemoteImage
             src={value}
             alt="Preview"
+            width={48}
+            height={48}
             className="w-12 h-12 rounded-md object-cover border border-base-content/10"
           />
         ) : null}

@@ -1,12 +1,14 @@
 "use client";
 
-import React, { useState, Suspense } from "react";
+import { useState, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { motion } from "framer-motion";
 import { FiLock, FiEye, FiEyeOff, FiShield } from "react-icons/fi";
-import { resetPassword } from "@/lib/api";
+import { resetPassword, errorMessage } from "@/lib/api";
 import { toast } from "react-hot-toast";
 import Skeleton from "@/components/ui/Skeleton";
+
+const MIN_PASSWORD_LENGTH = 8;
 
 const ResetForm = () => {
   const router = useRouter();
@@ -26,6 +28,10 @@ const ResetForm = () => {
       toast.error("Invalid reset link. Please request a new link.");
       return;
     }
+    if (password.length < MIN_PASSWORD_LENGTH) {
+      toast.error(`Password must be at least ${MIN_PASSWORD_LENGTH} characters.`);
+      return;
+    }
     if (password !== confirmPassword) {
       toast.error("Passwords do not match.");
       return;
@@ -39,7 +45,7 @@ const ResetForm = () => {
         router.push("/admin");
       }, 2000);
     } catch (err) {
-      toast.error(err.response?.data?.message || "Reset failed. The link might have expired.");
+      toast.error(errorMessage(err, "Reset failed. The link might have expired."));
     } finally {
       setLoading(false);
     }
@@ -73,7 +79,9 @@ const ResetForm = () => {
                 type={showPassword ? "text" : "password"}
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                placeholder="Enter new password"
+                placeholder={`At least ${MIN_PASSWORD_LENGTH} characters`}
+                minLength={MIN_PASSWORD_LENGTH}
+                autoComplete="new-password"
                 className="w-full pl-10 pr-10 py-3 bg-base-200 border border-base-300 rounded-md text-sm focus:outline-none focus:border-[#02b677] focus:ring-1 focus:ring-[#02b677] transition-all"
                 required
               />

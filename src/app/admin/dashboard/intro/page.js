@@ -1,21 +1,13 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
-import { useAdmin } from "@/components/providers/AdminProvider";
+import { useSectionDraft } from "@/components/admin/useSectionDraft";
 import { SectionWrapper, Card, Field, Input, Textarea, SectionTitle } from "@/components/admin/AdminComponents";
 import { AdminFormSkeleton } from "@/components/ui/Skeleton";
 
 const IntroductionEditor = () => {
-  const { portfolioData, updateSection, loading } = useAdmin();
-  const [data, setData] = useState(null);
+  const { draft: data, setDraft: setData, loading, save, reset } = useSectionDraft("introduction");
 
-  useEffect(() => { 
-    if (portfolioData?.introduction) {
-      setData(portfolioData.introduction); 
-    }
-  }, [portfolioData?.introduction]);
-
-  if (loading || !data) return <AdminFormSkeleton />;
+  if (loading) return <AdminFormSkeleton />;
 
   const set = (key, val) => setData((d) => ({ ...d, [key]: val }));
 
@@ -23,7 +15,7 @@ const IntroductionEditor = () => {
     <SectionWrapper
       title="Introduction Section"
       description="Edit the introduction text that appears below the hero section."
-      onSave={() => updateSection("introduction", data)}
+      onSave={save}
     >
       <Card>
         <SectionTitle>Main Content</SectionTitle>

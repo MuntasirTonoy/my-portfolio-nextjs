@@ -1,46 +1,44 @@
-import nodemailer from 'nodemailer';
+import nodemailer from "nodemailer";
 
-const sendEmail = async ({ email, subject, text, html }) => {
-  let transporter;
+async function createTransport() {
+  const { SMTP_HOST, SMTP_PORT, SMTP_USER, SMTP_PASS } = process.env;
 
-  if (process.env.SMTP_HOST && process.env.SMTP_USER && process.env.SMTP_PASS) {
-    transporter = nodemailer.createTransport({
-      host: process.env.SMTP_HOST,
-      port: parseInt(process.env.SMTP_PORT) || 587,
-      secure: process.env.SMTP_PORT == 465,
-      auth: {
-        user: process.env.SMTP_USER,
-        pass: process.env.SMTP_PASS,
-      },
+  if (SMTP_HOST && SMTP_USER && SMTP_PASS) {
+    const port = Number(SMTP_PORT) || 587;
+    return nodemailer.createTransport({
+      host: SMTP_HOST,
+      port,
+      secure: port === 465,
+      auth: { user: SMTP_USER, pass: SMTP_PASS },
     });
-  } else {
-    try {
-      const testAccount = await nodemailer.createTestAccount();
-      transporter = nodemailer.createTransport({
-        host: 'smtp.ethereal.email',
-        port: 587,
-        secure: false,
-        auth: {
-          user: testAccount.user,
-          pass: testAccount.pass,
-        },
-      });
-    } catch (err) {
-      console.error('Failed to create Ethereal SMTP account:', err);
-      throw new Error('Email service configuration missing');
-    }
   }
 
-  const mailOptions = {
-    from: process.env.SMTP_FROM || `"Portfolio Admin" <${process.env.SMTP_USER || 'no-reply@portfolio.com'}>`,
+  // Never silently "send" through a test inbox in production.
+  if (process.env.NODE_ENV === "production") {
+    throw new Error("SMTP is not configured (SMTP_HOST, SMTP_USER, SMTP_PASS)");
+  }
+
+  const testAccount = await nodemailer.createTestAccount();
+  return nodemailer.createTransport({
+    host: "smtp.ethereal.email",
+    port: 587,
+    auth: { user: testAccount.user, pass: testAccount.pass },
+  });
+}
+
+export default async function sendEmail({ email, subject, text, html }) {
+  const transporter = await createTransport();
+  const info = await transporter.sendMail({
+    from:
+      process.env.SMTP_FROM ||
+      `"Portfolio Admin" <${process.env.SMTP_USER || "no-reply@localhost"}>`,
     to: email,
     subject,
     text,
     html,
-  };
+  });
 
-  const info = await transporter.sendMail(mailOptions);
+  const previewUrl = nodemailer.getTestMessageUrl(info);
+  if (previewUrl) console.info("Dev email preview:", previewUrl);
   return info;
-};
-
-export default sendEmail;
+}

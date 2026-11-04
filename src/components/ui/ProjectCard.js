@@ -1,18 +1,19 @@
 "use client";
 
-import React, { useState } from "react";
+import { useState } from "react";
 import { motion } from "framer-motion";
 import { FiArrowRight } from "react-icons/fi";
 import Link from "next/link";
+import RemoteImage from "@/components/ui/RemoteImage";
 
 const statusColors = {
   completed: "bg-green-100 text-green-700",
   working: "bg-yellow-100 text-yellow-700",
+  planned: "bg-blue-100 text-blue-700",
 };
 
 const ProjectCard = ({ project, delay = 0 }) => {
-  const { _id, id, image, title, description, status } = project;
-  const projectId = _id || id;
+  const { _id: projectId, image, title, description, status } = project;
   const [isHovered, setIsHovered] = useState(false);
 
   return (
@@ -47,11 +48,15 @@ const ProjectCard = ({ project, delay = 0 }) => {
 
       {/* Content */}
       <div className="p-4 flex flex-col flex-grow space-y-3">
-        <img
-          src={image}
-          alt={title}
-          className="w-full h-40 object-cover rounded-md flex-shrink-0"
-        />
+        <div className="relative w-full h-40 flex-shrink-0 overflow-hidden rounded-md bg-base-200">
+          <RemoteImage
+            src={image}
+            alt={title}
+            fill
+            sizes="(min-width: 1024px) 400px, (min-width: 768px) 50vw, 100vw"
+            className="object-cover"
+          />
+        </div>
 
         <div className="flex justify-between items-center">
           <h2 className="text-xl font-bold text-base-content">{title}</h2>
@@ -78,10 +83,11 @@ const ProjectCard = ({ project, delay = 0 }) => {
 
         {/* Mobile View Button inside padding with margin-top auto to push it down */}
         <div className="lg:hidden mt-auto pt-4">
-          <Link href={`/project/${projectId}`}>
-            <button className="btn btn-sm rounded-full btn-soft btn-success text-spotify w-full flex items-center justify-center gap-2">
-              View <FiArrowRight size={20} />
-            </button>
+          <Link
+            href={`/project/${projectId}`}
+            className="btn btn-sm rounded-full btn-soft btn-success text-spotify w-full flex items-center justify-center gap-2"
+          >
+            View <FiArrowRight size={20} />
           </Link>
         </div>
       </div>
@@ -89,6 +95,7 @@ const ProjectCard = ({ project, delay = 0 }) => {
       {/* Animated Arrow Link - Desktop only */}
       <Link
         href={`/project/${projectId}`}
+        aria-label={`View ${title}`}
         className="hidden lg:flex absolute bottom-15 right-15 opacity-0 group-hover:opacity-100 translate-y-2 group-hover:translate-y-0 transition-all duration-300 bg-white text-spotify p-2 rounded-full shadow-md z-20"
       >
         <FiArrowRight size={20} />

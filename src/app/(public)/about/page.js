@@ -1,7 +1,8 @@
 import AboutClient from "./AboutClient";
 
 export const metadata = {
-  title: "About Md Muntasir Mahmud (Tonoy) | Full-Stack Web Developer",
+  title: "About",
+  alternates: { canonical: "/about" },
   description: "Learn more about Md Muntasir Mahmud (Tonoy)'s education, professional journey, certifications, and expertise as a full-stack web developer.",
   keywords: [
     "Md Muntasir Mahmud",

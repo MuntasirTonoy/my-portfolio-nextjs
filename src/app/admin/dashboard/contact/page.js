@@ -1,21 +1,13 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
-import { useAdmin } from "@/components/providers/AdminProvider";
+import { useSectionDraft } from "@/components/admin/useSectionDraft";
 import { SectionWrapper, Card, Field, Input, Textarea, SectionTitle } from "@/components/admin/AdminComponents";
 import { AdminFormSkeleton } from "@/components/ui/Skeleton";
 
 const ContactEditor = () => {
-  const { portfolioData, updateSection, resetSection, loading } = useAdmin();
-  const [data, setData] = useState(null);
+  const { draft: data, setDraft: setData, loading, save, reset } = useSectionDraft("contact");
 
-  useEffect(() => { 
-    if (portfolioData?.contact) {
-      setData(portfolioData.contact); 
-    }
-  }, [portfolioData?.contact]);
-
-  if (loading || !data) return <AdminFormSkeleton />;
+  if (loading) return <AdminFormSkeleton />;
 
   const set = (key, val) => setData((d) => ({ ...d, [key]: val }));
   const setSocial = (key, val) => {
@@ -27,8 +19,8 @@ const ContactEditor = () => {
     <SectionWrapper
       title="Contact Info"
       description="Update your contact details and social media profiles."
-      onSave={() => updateSection("contact", data)}
-      onReset={() => { resetSection?.("contact"); setData(portfolioData.contact); }}
+      onSave={save}
+      onReset={reset}
     >
       <Card>
         <SectionTitle>Section Content</SectionTitle>

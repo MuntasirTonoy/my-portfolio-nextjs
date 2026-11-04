@@ -1,38 +1,58 @@
-import { NextResponse } from 'next/server';
-import { v2 as cloudinary } from 'cloudinary';
+import { v2 as cloudinary } from "cloudinary";
+import { verifyAuth } from "@/lib/auth";
+import { json, fail, handleError, clientIp } from "@/lib/http";
+import { rateLimit, HOUR } from "@/lib/rateLimit";
 
 cloudinary.config({
   cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
   api_key: process.env.CLOUDINARY_API_KEY,
-  api_secret: process.env.CLOUDINARY_API_SECRET
+  api_secret: process.env.CLOUDINARY_API_SECRET,
 });
+
+const ALLOWED_TYPES = new Set(["image/jpeg", "image/png", "image/webp", "image/gif"]);
+const MB = 1024 * 1024;
+
+// The admin uploads project/profile images; anonymous visitors may only
+// upload a small avatar with their review, and are rate limited.
+const ADMIN_POLICY = { maxBytes: 5 * MB, folder: "portfolio_projects" };
+const PUBLIC_POLICY = { maxBytes: 2 * MB, folder: "review_avatars" };
+
+function uploadBuffer(buffer, folder) {
+  return new Promise((resolve, reject) => {
+    cloudinary.uploader
+      .upload_stream(
+        {
+          folder,
+          resource_type: "image",
+          allowed_formats: ["jpg", "jpeg", "png", "webp", "gif"],
+        },
+        (error, result) => (error ? reject(error) : resolve(result))
+      )
+      .end(buffer);
+  });
+}
 
 export async function POST(req) {
   try {
-    const formData = await req.formData();
-    const file = formData.get('image');
+    const isAdmin = Boolean(await verifyAuth(req));
+    const policy = isAdmin ? ADMIN_POLICY : PUBLIC_POLICY;
 
-    if (!file) {
-      return NextResponse.json({ message: 'No image uploaded' }, { status: 400 });
+    if (!isAdmin) {
+      const limited = rateLimit(`upload:${clientIp(req)}`, { limit: 5, windowMs: HOUR });
+      if (!limited.ok) return fail("Too many uploads. Try again later.", 429);
     }
 
-    const arrayBuffer = await file.arrayBuffer();
-    const buffer = Buffer.from(arrayBuffer);
+    const file = (await req.formData()).get("image");
+    if (!file || typeof file === "string") return fail("No image uploaded");
+    if (!ALLOWED_TYPES.has(file.type)) return fail("Only JPG, PNG, WebP or GIF images are allowed");
+    if (file.size > policy.maxBytes) {
+      return fail(`Image must be smaller than ${policy.maxBytes / MB} MB`, 413);
+    }
 
-    const uploadResult = await new Promise((resolve, reject) => {
-      const stream = cloudinary.uploader.upload_stream(
-        { folder: 'portfolio_projects' },
-        (error, result) => {
-          if (error) reject(error);
-          else resolve(result);
-        }
-      );
-      stream.end(buffer);
-    });
-
-    return NextResponse.json({ url: uploadResult.secure_url });
+    const buffer = Buffer.from(await file.arrayBuffer());
+    const result = await uploadBuffer(buffer, policy.folder);
+    return json({ url: result.secure_url });
   } catch (error) {
-    console.error('Cloudinary upload error:', error);
-    return NextResponse.json({ message: 'Error uploading image to Cloudinary', error: error.message }, { status: 500 });
+    return handleError("Cloudinary upload error", error);
   }
 }

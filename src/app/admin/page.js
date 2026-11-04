@@ -1,10 +1,10 @@
 "use client";
 
-import React, { useState } from "react";
+import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import { FiLock, FiEye, FiEyeOff, FiShield, FiMail, FiX } from "react-icons/fi";
-import { loginAdmin, forgotPassword } from "@/lib/api";
+import { loginAdmin, forgotPassword, errorMessage } from "@/lib/api";
 import { toast } from "react-hot-toast";
 
 const AdminLogin = () => {
@@ -26,15 +26,11 @@ const AdminLogin = () => {
     setError("");
 
     try {
-      const data = await loginAdmin({ email, password });
-      localStorage.setItem("admin_auth", "true");
-      localStorage.setItem("admin_token", data.token);
-      localStorage.setItem("admin_user", JSON.stringify(data));
-      router.push("/admin/dashboard");
+      // The server sets an httpOnly session cookie; nothing is stored client-side.
+      await loginAdmin({ email, password });
+      router.replace("/admin/dashboard");
     } catch (err) {
-      setError(
-        err.response?.data?.message || "Login failed. Please try again.",
-      );
+      setError(errorMessage(err, "Login failed. Please try again."));
     } finally {
       setLoading(false);
     }
@@ -54,9 +50,7 @@ const AdminLogin = () => {
       setForgotEmail("");
       setShowForgotModal(false);
     } catch (err) {
-      toast.error(
-        err.response?.data?.message || "Failed to request password reset.",
-      );
+      toast.error(errorMessage(err, "Failed to request password reset."));
     } finally {
       setForgotLoading(false);
     }
@@ -167,6 +161,7 @@ const AdminLogin = () => {
                 />
                 <button
                   type="button"
+                  aria-label={showPassword ? "Hide password" : "Show password"}
                   onClick={() => setShowPassword(!showPassword)}
                   className="absolute right-3 top-1/2 -translate-y-1/2 text-base-content/40 hover:text-base-content/70 transition-colors cursor-pointer"
                 >
@@ -208,7 +203,7 @@ const AdminLogin = () => {
                 boxShadow: "0 4px 20px rgba(2,182,119,0.4)",
               }}
             >
-              Access Dashboard
+              {loading ? "Signing in..." : "Access Dashboard"}
             </button>
 
             <p className="text-center text-xs text-base-content/30 pt-2">
@@ -267,7 +262,7 @@ const AdminLogin = () => {
                       type="email"
                       value={forgotEmail}
                       onChange={(e) => setForgotEmail(e.target.value)}
-                      placeholder="give origin email to reset password"
+                      placeholder="you@example.com"
                       className="w-full pl-10 pr-4 py-3 bg-base-200 border border-base-300 rounded-md text-sm focus:outline-none focus:border-[#02b677] focus:ring-1 focus:ring-[#02b677] transition-all"
                       required
                     />
@@ -284,7 +279,7 @@ const AdminLogin = () => {
                     boxShadow: "0 4px 15px rgba(2,182,119,0.3)",
                   }}
                 >
-                  Send Reset Link
+                  {forgotLoading ? "Sending..." : "Send Reset Link"}
                 </button>
               </form>
             </motion.div>

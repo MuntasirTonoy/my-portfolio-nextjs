@@ -1,18 +1,13 @@
 "use client";
 
-import React from "react";
 import ProjectCard from "@/components/ui/ProjectCard";
 import Button from "@/components/ui/Button";
 import { HiOutlineArrowNarrowRight } from "react-icons/hi";
-import Link from "next/link";
-import { usePortfolio } from "@/components/providers/AdminProvider";
-import { ProjectSkeleton } from "@/components/ui/Skeleton";
+import { usePortfolio } from "@/components/providers/PortfolioProvider";
 
 const FeaturedProjects = () => {
-  const { portfolioData, loading } = usePortfolio();
-
-  // Filter featured projects from the backend data
-  const featuredProjects = (portfolioData?.projects || []).filter((p) => p.featured);
+  const { projects = [] } = usePortfolio();
+  const featuredProjects = projects.filter((p) => p.featured);
 
   return (
     <section className="px-4 md:px-6 lg:px-8 py-20">
@@ -21,28 +16,16 @@ const FeaturedProjects = () => {
       </h2>
 
       <div className="max-w-7xl mx-auto grid gap-8 sm:grid-cols-2 lg:grid-cols-3">
-        {loading ? (
-          <>
-            <ProjectSkeleton />
-            <ProjectSkeleton />
-            <ProjectSkeleton />
-          </>
-        ) : (
-          featuredProjects.map((project, i) => (
-            <ProjectCard key={project._id || i} project={project} delay={i * 0.15} />
-          ))
-        )}
+        {featuredProjects.map((project, i) => (
+          <ProjectCard key={project._id} project={project} delay={i * 0.15} />
+        ))}
       </div>
 
-      {!loading && (
-        <div className="text-center mt-12">
-          <Link href="/projects">
-            <Button>
-              All Projects <HiOutlineArrowNarrowRight />
-            </Button>
-          </Link>
-        </div>
-      )}
+      <div className="text-center mt-12">
+        <Button href="/projects">
+          All Projects <HiOutlineArrowNarrowRight />
+        </Button>
+      </div>
     </section>
   );
 };

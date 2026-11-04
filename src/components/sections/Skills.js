@@ -1,14 +1,10 @@
 "use client";
 
-import React from "react";
 import SkillCard from "@/components/ui/SkillCard";
-import { usePortfolio } from "@/components/providers/AdminProvider";
-import { SkillSkeleton } from "@/components/ui/Skeleton";
+import { usePortfolio } from "@/components/providers/PortfolioProvider";
 
 const Skills = () => {
-  const { portfolioData, loading } = usePortfolio();
-
-  const skills = portfolioData?.skills || [];
+  const { skills = [] } = usePortfolio();
 
   return (
     <div className="px-4 md:px-8 lg:px-20 bg-base-100 text-base-content py-20">
@@ -23,22 +19,14 @@ const Skills = () => {
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8">
-          {loading ? (
-            <>
-              <SkillSkeleton />
-              <SkillSkeleton />
-              <SkillSkeleton />
-            </>
-          ) : (
-            skills.map((group, index) => (
-              <SkillCard
-                key={index}
-                category={group.category}
-                items={group.items}
-                delay={index * 0.2}
-              />
-            ))
-          )}
+          {skills.map((group, index) => (
+            <SkillCard
+              key={group._id || index}
+              category={group.category}
+              items={group.items || []}
+              delay={index * 0.2}
+            />
+          ))}
         </div>
       </div>
     </div>

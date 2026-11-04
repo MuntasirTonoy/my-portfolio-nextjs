@@ -1,30 +1,32 @@
-import { NextResponse } from 'next/server';
-import jwt from 'jsonwebtoken';
-import connectDB from '@/lib/db';
-import User from '@/models/User';
+import { isValidObjectId } from "mongoose";
+import connectDB from "@/lib/db";
+import User from "@/models/User";
+import { verifyResetToken } from "@/lib/auth";
+import { json, fail, handleError, clientIp, passwordError } from "@/lib/http";
+import { rateLimit, MINUTE } from "@/lib/rateLimit";
+
+const INVALID_LINK = "Password reset link is invalid or has expired";
 
 export async function POST(req) {
+  const limited = rateLimit(`reset:${clientIp(req)}`, { limit: 5, windowMs: 15 * MINUTE });
+  if (!limited.ok) return fail("Too many requests. Try again later.", 429);
+
   try {
-    await connectDB();
     const { id, token, password } = await req.json();
 
-    const user = await User.findById(id);
-    if (!user) {
-      return NextResponse.json({ message: 'User not found' }, { status: 404 });
-    }
+    const error = passwordError(password);
+    if (error) return fail(error);
+    if (!isValidObjectId(id) || typeof token !== "string") return fail(INVALID_LINK);
 
-    try {
-      jwt.verify(token, process.env.JWT_SECRET + user.password);
-    } catch (err) {
-      return NextResponse.json({ message: 'Password reset token is invalid or has expired' }, { status: 400 });
-    }
+    await connectDB();
+    const user = await User.findById(id);
+    if (!user || !verifyResetToken(token, user)) return fail(INVALID_LINK);
 
     user.password = password;
     await user.save();
 
-    return NextResponse.json({ message: 'Password reset successful. You can now log in.' });
+    return json({ message: "Password reset successful. You can now log in." });
   } catch (error) {
-    console.error('Reset password error:', error);
-    return NextResponse.json({ message: 'Server error during password reset' }, { status: 500 });
+    return handleError("Reset password error", error);
   }
 }

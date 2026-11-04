@@ -1,22 +1,28 @@
 "use client";
 
-import React, { useState, useMemo } from "react";
+import { useState, useMemo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import ProjectCard from "@/components/ui/ProjectCard";
-import { ProjectSkeleton } from "@/components/ui/Skeleton";
-import Skeleton from "@/components/ui/Skeleton";
 import { BiSearch } from "react-icons/bi";
-import { usePortfolio } from "@/components/providers/AdminProvider";
+import { usePortfolio } from "@/components/providers/PortfolioProvider";
+
+const allTech = (project) => Object.values(project.tech || {}).flat();
 
 const AllProjects = () => {
-  const { portfolioData, loading } = usePortfolio();
-  
-  const projects = portfolioData?.projects || [];
+  const { projects = [] } = usePortfolio();
 
   const [searchQuery, setSearchQuery] = useState("");
   const [techFilter, setTechFilter] = useState("");
   const [tagFilter, setTagFilter] = useState("");
   const [statusFilter, setStatusFilter] = useState("");
+
+  const hasFilters = Boolean(searchQuery || techFilter || tagFilter || statusFilter);
+  const resetFilters = () => {
+    setSearchQuery("");
+    setTechFilter("");
+    setTagFilter("");
+    setStatusFilter("");
+  };
 
   const filterOptions = useMemo(() => {
     const techSet = new Set();
@@ -24,9 +30,7 @@ const AllProjects = () => {
     const statusSet = new Set();
 
     projects.forEach((p) => {
-      Object.values(p.tech || {})
-        .flat()
-        .forEach((t) => techSet.add(t));
+      allTech(p).forEach((t) => techSet.add(t));
       (p.tags || []).forEach((tag) => tagSet.add(tag));
       if (p.status) statusSet.add(p.status);
     });
@@ -39,16 +43,14 @@ const AllProjects = () => {
   }, [projects]);
 
   const filteredProjects = useMemo(() => {
+    const query = searchQuery.trim().toLowerCase();
     return projects.filter((p) => {
       const matchesSearch =
-        p.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        p.description.toLowerCase().includes(searchQuery.toLowerCase());
+        !query ||
+        (p.title || "").toLowerCase().includes(query) ||
+        (p.description || "").toLowerCase().includes(query);
 
-      const matchesTech =
-        !techFilter ||
-        Object.values(p.tech || {})
-          .flat()
-          .includes(techFilter);
+      const matchesTech = !techFilter || allTech(p).includes(techFilter);
 
       const matchesTag = !tagFilter || (p.tags || []).includes(tagFilter);
 
@@ -63,9 +65,9 @@ const AllProjects = () => {
       {/* Hero Section */}
       <section className="text-base-content mb-10">
         <div className="container mx-auto px-4 text-center">
-          <h2 className="text-5xl font-extrabold mb-3">
+          <h1 className="text-5xl font-extrabold mb-3">
             <span className="text-spotify">My</span> Projects
-          </h2>
+          </h1>
           <p className="text-lg opacity-90">
             Browse through my development projects
           </p>
@@ -76,13 +78,15 @@ const AllProjects = () => {
         {/* Filters */}
         <div className="flex flex-wrap gap-4 mb-5">
           <div className="mb-6 flex">
-            <label className="label">
+            <label className="label" htmlFor="project-search">
               <span className="label-text mr-1">
-                <BiSearch size={30} />
+                <BiSearch size={30} aria-hidden="true" />
+                <span className="sr-only">Search projects</span>
               </span>
             </label>
             <input
-              type="text"
+              id="project-search"
+              type="search"
               placeholder="Search Projects..."
               className="input input-bordered w-full"
               value={searchQuery}
@@ -127,23 +131,11 @@ const AllProjects = () => {
 
         {/* Results Info */}
         <div className="flex justify-between items-center mb-6">
-          <h2 className="text-2xl font-semibold">
-            {loading ? (
-              <Skeleton width="200px" height="28px" rounded="rounded-lg" />
-            ) : (
-              `${filteredProjects.length} Projects Found`
-            )}
+          <h2 className="text-2xl font-semibold" aria-live="polite">
+            {filteredProjects.length} {filteredProjects.length === 1 ? "Project" : "Projects"} Found
           </h2>
-          {(searchQuery || techFilter || tagFilter || statusFilter) && !loading && (
-            <button
-              onClick={() => {
-                setSearchQuery("");
-                setTechFilter("");
-                setTagFilter("");
-                setStatusFilter("");
-              }}
-              className="btn btn-sm btn-outline"
-            >
+          {hasFilters && (
+            <button type="button" onClick={resetFilters} className="btn btn-sm btn-outline">
               Reset All Filters
             </button>
           )}
@@ -151,13 +143,11 @@ const AllProjects = () => {
 
         {/* Projects Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 my-10">
-          {loading ? (
-            [1, 2, 3, 4, 5, 6].map(i => <ProjectSkeleton key={i} />)
-          ) : filteredProjects.length > 0 ? (
+          {filteredProjects.length > 0 ? (
             <AnimatePresence>
               {filteredProjects.map((project, index) => (
                 <motion.div
-                  key={project._id || index}
+                  key={project._id}
                   layout
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
@@ -172,15 +162,7 @@ const AllProjects = () => {
             <div className="col-span-full text-center py-16 bg-base-200 rounded-xl">
               <div className="text-5xl mb-4">🧐</div>
               <h3 className="text-xl font-medium mb-2">No projects match your filters</h3>
-              <button
-                onClick={() => {
-                  setSearchQuery("");
-                  setTechFilter("");
-                  setTagFilter("");
-                  setStatusFilter("");
-                }}
-                className="btn btn-primary mt-4"
-              >
+              <button type="button" onClick={resetFilters} className="btn btn-primary mt-4">
                 Reset All Filters
               </button>
             </div>

@@ -1,7 +1,7 @@
 "use client";
 
-import React from "react";
 import { motion } from "framer-motion";
+import RemoteImage from "@/components/ui/RemoteImage";
 
 const SkillCard = ({ category, items, delay }) => {
   return (
@@ -32,9 +32,11 @@ const SkillCard = ({ category, items, delay }) => {
             }}
             viewport={{ once: false }}
           >
-            <img
+            <RemoteImage
               src={skill.icon}
               alt={skill.name}
+              width={32}
+              height={32}
               className="w-8 h-8 shrink-0 object-contain"
             />
             <span className="text-xs font-medium text-base-content text-center leading-tight">

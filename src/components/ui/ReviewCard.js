@@ -1,8 +1,8 @@
 "use client";
 
-import React from "react";
 import { FaQuoteLeft, FaStar } from "react-icons/fa";
 import { motion } from "framer-motion";
+import RemoteImage from "@/components/ui/RemoteImage";
 
 const ReviewCard = ({ name, role, review, avatar, rating }) => {
   return (
@@ -19,11 +19,22 @@ const ReviewCard = ({ name, role, review, avatar, rating }) => {
       {/* Header: Avatar + Stars */}
       <div className="flex justify-between items-start mb-6">
         <div className="relative">
-          <img
-            src={avatar}
-            alt={name}
-            className="w-14 h-14 rounded-2xl object-cover ring-4 ring-base-100 shadow-xl group-hover:ring-spotify/20 transition-all duration-500"
-          />
+          {avatar ? (
+            <RemoteImage
+              src={avatar}
+              alt={name}
+              width={56}
+              height={56}
+              className="w-14 h-14 rounded-2xl object-cover ring-4 ring-base-100 shadow-xl group-hover:ring-spotify/20 transition-all duration-500"
+            />
+          ) : (
+            <div
+              aria-hidden="true"
+              className="w-14 h-14 rounded-2xl ring-4 ring-base-100 shadow-xl bg-spotify/15 text-spotify flex items-center justify-center text-xl font-bold"
+            >
+              {name?.charAt(0)?.toUpperCase() || "?"}
+            </div>
+          )}
           <div className="absolute -bottom-2 -right-2 bg-spotify p-1.5 rounded-lg shadow-lg">
             <FaQuoteLeft className="text-white text-[10px]" />
           </div>
@@ -42,7 +53,7 @@ const ReviewCard = ({ name, role, review, avatar, rating }) => {
       {/* Review text with Line Clamp */}
       <div className="flex-1">
         <p className="text-base-content/70 text-sm sm:text-base leading-relaxed italic line-clamp-4 group-hover:text-base-content transition-colors duration-300">
-          "{review}"
+          &ldquo;{review}&rdquo;
         </p>
       </div>
 

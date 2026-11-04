@@ -1,14 +1,12 @@
 "use client";
 
-import React from "react";
 import Button from "@/components/ui/Button";
 import { FiDownload } from "react-icons/fi";
 import WordFlip from "@/components/ui/WordFlip";
 import { IoChatbubblesOutline } from "react-icons/io5";
 import HeroPhoto from "@/components/ui/HeroPhoto";
 import { motion } from "framer-motion";
-import { usePortfolio } from "@/components/providers/AdminProvider";
-import { HeroSkeleton } from "@/components/ui/Skeleton";
+import { usePortfolio } from "@/components/providers/PortfolioProvider";
 
 /* Stagger container – children animate in sequence */
 const containerVariants = {
@@ -55,11 +53,8 @@ const particles = [
 ];
 
 const Hero = () => {
-  const { portfolioData, loading } = usePortfolio();
-  
-  if (loading || !portfolioData?.hero) return <HeroSkeleton />;
-
-  const { hero } = portfolioData;
+  const { hero } = usePortfolio();
+  if (!hero) return null;
 
   return (
     <section
@@ -160,24 +155,16 @@ const Hero = () => {
             variants={itemVariants}
             className="flex gap-3 flex-wrap justify-center lg:justify-start mt-6"
           >
-            <a href={hero.cvLink} target="_blank" rel="noopener noreferrer">
-              <Button>
-                <span className="flex items-center gap-2">
-                  {hero.ctaBtn1Text || "Download CV"} <FiDownload />
-                </span>
+            {hero.cvLink && (
+              <Button href={hero.cvLink} external>
+                {hero.ctaBtn1Text || "Download CV"} <FiDownload />
               </Button>
-            </a>
-            <a
-              href={hero.whatsappLink}
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              <Button>
-                <span className="flex items-center gap-2">
-                  {hero.ctaBtn2Text || "Let's Talk"} <IoChatbubblesOutline />
-                </span>
+            )}
+            {hero.whatsappLink && (
+              <Button href={hero.whatsappLink} external>
+                {hero.ctaBtn2Text || "Let's Talk"} <IoChatbubblesOutline />
               </Button>
-            </a>
+            )}
           </motion.div>
         </motion.div>
 

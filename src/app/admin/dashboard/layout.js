@@ -1,9 +1,8 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
-import { useRouter, usePathname } from "next/navigation";
+import { useState } from "react";
+import { usePathname } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
-import { Toaster } from "react-hot-toast";
 import {
   FiHome,
   FiUser,
@@ -20,7 +19,7 @@ import {
   FiStar,
 } from "react-icons/fi";
 import Link from "next/link";
-import { useAdmin } from "@/components/providers/AdminProvider";
+import { AdminProvider, useAdmin } from "@/components/providers/AdminProvider";
 import { useTheme } from "@/components/providers/ThemeProvider";
 import Switch from "@/components/ui/Switch";
 import Button from "@/components/ui/Button";
@@ -38,27 +37,21 @@ const navLinks = [
   { to: "/admin/dashboard/settings", label: "Settings", icon: <FiSettings /> },
 ];
 
+// Access is enforced server-side by src/proxy.js and every API route;
+// AdminProvider also redirects to the login page if the session expires.
 export default function AdminDashboardLayout({ children }) {
-  const router = useRouter();
+  return (
+    <AdminProvider>
+      <DashboardShell>{children}</DashboardShell>
+    </AdminProvider>
+  );
+}
+
+function DashboardShell({ children }) {
   const pathname = usePathname();
-  const { saveStatus } = useAdmin();
+  const { logout } = useAdmin();
   const { theme, toggleTheme } = useTheme();
   const [sidebarOpen, setSidebarOpen] = useState(false);
-
-  // Auth guard
-  useEffect(() => {
-    const auth = localStorage.getItem("admin_auth");
-    if (auth !== "true") {
-      router.push("/admin");
-    }
-  }, [router]);
-
-  const handleLogout = () => {
-    localStorage.removeItem("admin_auth");
-    localStorage.removeItem("admin_token");
-    localStorage.removeItem("admin_user");
-    router.push("/admin");
-  };
 
   return (
     <div className="min-h-screen bg-base-200 flex">
@@ -96,6 +89,8 @@ export default function AdminDashboardLayout({ children }) {
             <p className="text-xs text-base-content/40">Portfolio Manager</p>
           </div>
           <button
+            type="button"
+            aria-label="Close menu"
             className="ml-auto lg:hidden cursor-pointer"
             onClick={() => setSidebarOpen(false)}
           >
@@ -143,7 +138,8 @@ export default function AdminDashboardLayout({ children }) {
         {/* Save status + Logout */}
         <div className="p-4 border-t border-base-300 space-y-2">
           <button
-            onClick={handleLogout}
+            type="button"
+            onClick={logout}
             className="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium text-red-400 hover:bg-red-500/10 transition-all cursor-pointer"
           >
             <FiLogOut /> Logout
@@ -156,6 +152,8 @@ export default function AdminDashboardLayout({ children }) {
         {/* Top bar */}
         <header className="sticky top-0 z-20 bg-base-100 border-b border-base-300 px-6 py-4 flex items-center gap-4">
           <button
+            type="button"
+            aria-label="Open menu"
             className="lg:hidden p-2 rounded-lg hover:bg-base-200 cursor-pointer"
             onClick={() => setSidebarOpen(true)}
           >
@@ -170,7 +168,7 @@ export default function AdminDashboardLayout({ children }) {
 
           <div className="flex items-center gap-4">
             <Switch theme={theme} toggleTheme={toggleTheme} />
-            <Button onClick={() => window.open("/", "_blank")}>
+            <Button href="/" external>
               <span className="text-xs">View Site ↗</span>
             </Button>
           </div>

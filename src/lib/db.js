@@ -1,36 +1,23 @@
-import mongoose from 'mongoose';
+import mongoose from "mongoose";
 
 const MONGO_URI = process.env.MONGO_DIRECT_URI || process.env.MONGO_URI;
 
-let cached = global.mongoose;
+// Reuse the connection across hot reloads and serverless invocations.
+const cached = (global.mongoose ??= { conn: null, promise: null });
 
-if (!cached) {
-  cached = global.mongoose = { conn: null, promise: null };
-}
-
-async function connectDB() {
+export default async function connectDB() {
   if (!MONGO_URI) {
-    throw new Error('Please define the MONGO_URI environment variable inside .env');
+    throw new Error("MONGO_URI is not set");
   }
+  if (cached.conn) return cached.conn;
 
-  if (cached.conn) {
-    return cached.conn;
-  }
-
-  if (!cached.promise) {
-    cached.promise = mongoose.connect(MONGO_URI).then((m) => {
-      return m;
-    });
-  }
+  cached.promise ??= mongoose.connect(MONGO_URI);
 
   try {
     cached.conn = await cached.promise;
-  } catch (e) {
+  } catch (error) {
     cached.promise = null;
-    throw e;
+    throw error;
   }
-
   return cached.conn;
 }
-
-export default connectDB;

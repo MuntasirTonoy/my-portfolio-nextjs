@@ -1,10 +1,11 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
-import { useAdmin } from "@/components/providers/AdminProvider";
+import { useState } from "react";
+import { useSectionDraft } from "@/components/admin/useSectionDraft";
 import { SectionWrapper, Card, Field, Input, Textarea, SectionTitle, RemoveBtn, AddBtn, ImageUpload } from "@/components/admin/AdminComponents";
 import { WithContext as ReactTags } from 'react-tag-input';
 import { AdminFormSkeleton } from "@/components/ui/Skeleton";
+import RemoteImage from "@/components/ui/RemoteImage";
 
 const KeyCodes = {
   comma: 188,
@@ -37,17 +38,10 @@ const defaultProject = {
 };
 
 const ProjectsEditor = () => {
-  const { portfolioData, updateSection, resetSection, loading } = useAdmin();
-  const [projects, setProjects] = useState(null);
+  const { draft: projects, setDraft: setProjects, loading, save, reset } = useSectionDraft("projects", { list: true });
   const [expanded, setExpanded] = useState(null);
 
-  useEffect(() => { 
-    if (portfolioData?.projects) {
-      setProjects(portfolioData.projects); 
-    }
-  }, [portfolioData?.projects]);
-
-  if (loading || !projects) return <AdminFormSkeleton />;
+  if (loading) return <AdminFormSkeleton />;
 
   const setProject = (i, key, val) => {
     const arr = [...projects];
@@ -96,14 +90,14 @@ const ProjectsEditor = () => {
     <SectionWrapper
       title="Projects"
       description="Manage your portfolio projects. Changes are saved to MongoDB."
-      onSave={() => updateSection("projects", projects)}
-      onReset={() => { resetSection?.("projects"); setProjects(portfolioData.projects); }}
+      onSave={save}
+      onReset={reset}
     >
       {projects.map((proj, i) => (
         <Card key={proj._id || i}>
           <div className="flex items-center justify-between cursor-pointer" onClick={() => setExpanded(expanded === i ? null : i)}>
             <div className="flex items-center gap-3">
-              {proj.image && <img src={proj.image} alt="" className="w-12 h-10 rounded-md object-cover" onError={(e) => (e.target.style.display = "none")} />}
+              {proj.image && <RemoteImage src={proj.image} alt="" width={48} height={40} className="w-12 h-10 rounded-md object-cover" />}
               <div>
                 <p className="font-bold text-sm">{proj.title}</p>
                 <span className={`text-xs px-2 py-0.5 rounded-md font-semibold ${proj.featured ? "bg-[#02b677]/20 text-[#02b677]" : "bg-base-200 text-base-content/40"}`}>

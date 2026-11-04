@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   FaGithub,
@@ -12,14 +12,40 @@ import {
 } from "react-icons/fa";
 import { IoCheckmarkDoneCircle } from "react-icons/io5";
 import Link from "next/link";
-import { usePortfolio } from "@/components/providers/AdminProvider";
-import { AboutSkeleton } from "@/components/ui/Skeleton";
+import { usePortfolio } from "@/components/providers/PortfolioProvider";
+import RemoteImage from "@/components/ui/RemoteImage";
+
+const FALLBACK_PROFILE_IMAGE = "https://i.ibb.co.com/rR6w9b10/image.jpg";
+
+// Animation shared by every card on the page.
+const cardVariants = {
+  hidden: { opacity: 0, y: 30 },
+  visible: (customDelay) => ({
+    opacity: 1,
+    y: 0,
+    transition: { duration: 0.6, delay: customDelay },
+  }),
+};
+
+const SocialLink = ({ href, label, external, children }) =>
+  href ? (
+    <a
+      href={href}
+      aria-label={label}
+      className="hover:text-green-500 transition"
+      {...(external && { target: "_blank", rel: "noopener noreferrer" })}
+    >
+      {children}
+    </a>
+  ) : null;
+
+// Accept either a full mailto:/https link or a bare email / phone number.
+const asMailto = (v) => (!v || v.includes(":") ? v : `mailto:${v}`);
+const asWhatsapp = (v) => (!v || v.includes("://") ? v : `https://wa.me/${v.replace(/\D/g, "")}`);
 
 const AboutClient = () => {
-  const { portfolioData, loading } = usePortfolio();
+  const { about = {} } = usePortfolio();
   const [selectedCert, setSelectedCert] = useState(null);
-
-  if (loading || !portfolioData?.about) return <AboutSkeleton />;
 
   const {
     name,
@@ -32,18 +58,8 @@ const AboutClient = () => {
     professionalJourney,
     journey,
     education,
-    certificates
-  } = portfolioData.about;
-
-  // common animation settings
-  const cardVariants = {
-    hidden: { opacity: 0, y: 30 },
-    visible: (customDelay) => ({
-      opacity: 1,
-      y: 0,
-      transition: { duration: 0.6, delay: customDelay },
-    }),
-  };
+    certificates,
+  } = about;
 
   return (
     <>
@@ -59,43 +75,30 @@ const AboutClient = () => {
           viewport={{ once: false }}
           custom={0} // delay 0s
         >
-          <img
-            src={profileImage || "https://i.ibb.co.com/rR6w9b10/image.jpg"}
-            alt={name}
+          <RemoteImage
+            src={profileImage || FALLBACK_PROFILE_IMAGE}
+            alt={name || "Profile photo"}
+            width={160}
+            height={160}
+            priority
             className="w-40 h-40 rounded-full ring-4 ring-green-500 shadow-lg mb-6 object-cover"
           />
-          <h2 className="text-3xl mb-2 font-bold">{name}</h2>
+          <h1 className="text-3xl mb-2 font-bold">{name}</h1>
           <p className="text-spotify mb-4">{designation}</p>
 
           <div className="flex space-x-6 text-gray-400 mb-6 text-lg">
-            <a
-              href={socialLinks?.github}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="hover:text-green-500 transition"
-            >
+            <SocialLink href={socialLinks?.github} label="GitHub" external>
               <FaGithub />
-            </a>
-            <a
-              href={socialLinks?.linkedin}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="hover:text-green-500 transition"
-            >
+            </SocialLink>
+            <SocialLink href={socialLinks?.linkedin} label="LinkedIn" external>
               <FaLinkedin />
-            </a>
-            <a
-              href={socialLinks?.email}
-              className="hover:text-green-500 transition"
-            >
+            </SocialLink>
+            <SocialLink href={asMailto(socialLinks?.email)} label="Email">
               <FaEnvelope />
-            </a>
-            <a
-              href={socialLinks?.whatsapp}
-              className="hover:text-green-500 transition"
-            >
+            </SocialLink>
+            <SocialLink href={asWhatsapp(socialLinks?.whatsapp)} label="WhatsApp" external>
               <FaWhatsapp />
-            </a>
+            </SocialLink>
           </div>
 
           <ul className="space-y-3 mb-6">
@@ -188,16 +191,23 @@ const AboutClient = () => {
                 viewport={{ once: false }}
                 custom={index * 0.2 + 0.2}
               >
-                <div 
-                  className="h-48 overflow-hidden bg-base-200 cursor-pointer"
+                <button
+                  type="button"
+                  aria-label={`View certificate: ${cert.title}`}
+                  className="relative h-48 overflow-hidden bg-base-200 cursor-pointer"
                   onClick={() => setSelectedCert(cert)}
+                  disabled={!cert.image}
                 >
-                  <img
-                    src={cert.image || "https://via.placeholder.com/400x300?text=Certificate"}
-                    alt={cert.title}
-                    className="w-full h-full object-cover transition-transform duration-500 hover:scale-110"
-                  />
-                </div>
+                  {cert.image && (
+                    <RemoteImage
+                      src={cert.image}
+                      alt={cert.title}
+                      fill
+                      sizes="(min-width: 768px) 33vw, (min-width: 640px) 50vw, 100vw"
+                      className="object-cover transition-transform duration-500 hover:scale-110"
+                    />
+                  )}
+                </button>
                 <div className="p-5 flex-1 flex flex-col">
                   <h3 className="font-bold text-lg mb-2">{cert.title}</h3>
                   <p className="text-sm text-gray-400 mt-auto">{cert.institution}</p>
@@ -266,6 +276,8 @@ const AboutClient = () => {
                   <p className="text-sm text-gray-400">{selectedCert.institution}</p>
                 </div>
                 <button
+                  type="button"
+                  aria-label="Close"
                   onClick={() => setSelectedCert(null)}
                   className="p-2 hover:bg-base-300 rounded-full transition-colors"
                 >
@@ -277,10 +289,13 @@ const AboutClient = () => {
               
               {/* Image Container */}
               <div className="flex-1 overflow-auto p-4 flex items-center justify-center bg-base-300/30">
-                <img
-                  src={selectedCert.image || "https://via.placeholder.com/800x600?text=Certificate"}
+                <RemoteImage
+                  src={selectedCert.image}
                   alt={selectedCert.title}
-                  className="max-w-full max-h-[70vh] object-contain rounded-lg shadow-md"
+                  width={1200}
+                  height={900}
+                  sizes="(min-width: 1024px) 1024px, 100vw"
+                  className="max-w-full max-h-[70vh] w-auto h-auto object-contain rounded-lg shadow-md"
                 />
               </div>
             </motion.div>

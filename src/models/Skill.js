@@ -1,6 +1,7 @@
 import mongoose from 'mongoose';
 
 const skillSchema = new mongoose.Schema({
+  order: { type: Number, default: 0, index: true },
   category: {
     type: String,
     required: true
